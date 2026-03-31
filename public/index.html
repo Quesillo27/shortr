@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shortr — URL Shortener</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <style>
+    /* ===== Variables y Reset ===== */
+    :root {
+      --bg: #0f0f13;
+      --bg2: #16161e;
+      --bg3: #1e1e2a;
+      --border: #2a2a3a;
+      --accent: #7c6af7;
+      --accent2: #a78bfa;
+      --accent-glow: rgba(124, 106, 247, 0.25);
+      --success: #22c55e;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --text: #e2e8f0;
+      --text2: #94a3b8;
+      --text3: #64748b;
+      --card-shadow: 0 4px 24px rgba(0,0,0,0.4);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --transition: 0.2s ease;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ===== Scrollbar ===== */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ===== Pantalla de Login ===== */
+    #login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: radial-gradient(ellipse at 50% 0%, rgba(124,106,247,0.15) 0%, transparent 60%);
+      padding: 1rem;
+    }
+
+    .login-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: var(--card-shadow), 0 0 60px rgba(124,106,247,0.08);
+    }
+
+    .login-logo {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .login-logo .logo-mark {
+      display: inline-block;
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      margin: 0 auto 1rem;
+      box-shadow: 0 8px 24px var(--accent-glow);
+    }
+
+    .login-logo h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, #fff 0%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .login-logo p {
+      color: var(--text2);
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text2);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-size: 0.95rem;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      outline: none;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .form-group input::placeholder { color: var(--text3); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all var(--transition);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white;
+      box-shadow: 0 4px 16px var(--accent-glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(124,106,247,0.45);
+    }
+
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-danger {
+      background: rgba(239,68,68,0.12);
+      color: var(--danger);
+      border: 1px solid rgba(239,68,68,0.2);
+    }
+
+    .btn-danger:hover {
+      background: rgba(239,68,68,0.2);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text2);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      background: var(--bg3);
+      color: var(--text);
+    }
+
+    .btn-sm {
+      padding: 0.4rem 0.9rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-full { width: 100%; }
+
+    #login-error {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.25);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      color: #fca5a5;
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    /* ===== Layout Principal ===== */
+    #app {
+      display: none;
+      min-height: 100vh;
+    }
+
+    /* ===== Navbar ===== */
+    .navbar {
+      background: rgba(22, 22, 30, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 0 1.5rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+    }
+
+    .nav-logo-mark {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    .nav-brand span {
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, #fff, var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .nav-user {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text2);
+      font-size: 0.875rem;
+    }
+
+    .nav-avatar {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: white;
+    }
+
+    /* ===== Contenido principal ===== */
+    .main-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* ===== Stats Cards ===== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      transition: border-color var(--transition), transform var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+
+    .stat-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .stat-card:hover::before { opacity: 1; }
+
+    .stat-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .stat-icon.purple { background: rgba(124,106,247,0.15); }
+    .stat-icon.green { background: rgba(34,197,94,0.15); }
+    .stat-icon.blue { background: rgba(59,130,246,0.15); }
+    .stat-icon.amber { background: rgba(245,158,11,0.15); }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 0.25rem;
+      letter-spacing: -0.03em;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text2);
+      font-weight: 500;
+    }
+
+    /* ===== Panel de crear link ===== */
+    .create-panel {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+
+    .panel-header h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .create-form {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 0.75rem;
+      align-items: end;
+    }
+
+    .create-form .form-group {
+      margin-bottom: 0;
+    }
+
+    .create-form .form-group label {
+      margin-bottom: 0.375rem;
+    }
+
+    .advanced-toggle {
+      background: none;
+      border: none;
+      color: var(--accent2);
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      transition: color var(--transition);
+    }
+
+    .advanced-toggle:hover { color: var(--accent); }
+
+    .advanced-fields {
+      display: none;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .advanced-fields.visible { display: grid; }
+
+    /* ===== Tabla de links ===== */
+    .links-panel {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .links-panel .panel-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text3);
+      background: var(--bg3);
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-top: 1px solid var(--border);
+      transition: background var(--transition);
+    }
+
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+    tbody td {
+      padding: 0.875rem 1rem;
+      font-size: 0.875rem;
+      vertical-align: middle;
+    }
+
+    .link-code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.8rem;
+      background: var(--bg3);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      color: var(--accent2);
+      font-weight: 600;
+    }
+
+    .link-original {
+      max-width: 280px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text2);
+      font-size: 0.82rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .badge-success { background: rgba(34,197,94,0.12); color: #4ade80; }
+    .badge-danger { background: rgba(239,68,68,0.12); color: #f87171; }
+    .badge-warning { background: rgba(245,158,11,0.12); color: #fbbf24; }
+
+    .actions-cell {
+      display: flex;
+      gap: 0.5rem;
+      white-space: nowrap;
+    }
+
+    .btn-icon {
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text2);
+      font-size: 0.85rem;
+      transition: all var(--transition);
+    }
+
+    .btn-icon:hover {
+      background: var(--bg3);
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    .btn-icon.danger:hover {
+      background: rgba(239,68,68,0.1);
+      color: var(--danger);
+      border-color: rgba(239,68,68,0.3);
+    }
+
+    .btn-icon.analytics:hover {
+      background: rgba(124,106,247,0.1);
+      color: var(--accent2);
+      border-color: var(--accent);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: var(--text3);
+    }
+
+    .empty-state .empty-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .empty-state p {
+      font-size: 0.9rem;
+    }
+
+    /* ===== Modal de Analytics ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition);
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: translateY(16px);
+      transition: transform var(--transition);
+      box-shadow: var(--card-shadow);
+    }
+
+    .modal-overlay.active .modal {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      padding: 1.5rem 1.5rem 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .modal-title h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .modal-title p {
+      font-size: 0.8rem;
+      color: var(--text2);
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+      transition: all var(--transition);
+    }
+
+    .modal-close:hover { background: var(--border); color: var(--text); }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .analytics-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .analytics-stat {
+      background: var(--bg3);
+      border-radius: var(--radius-sm);
+      padding: 1rem 1.25rem;
+      text-align: center;
+    }
+
+    .analytics-stat .value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent2);
+    }
+
+    .analytics-stat .label {
+      font-size: 0.75rem;
+      color: var(--text3);
+      margin-top: 0.2rem;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 280px;
+      margin-bottom: 1.5rem;
+    }
+
+    .referrers-section h4 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.75rem;
+    }
+
+    .referrer-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .referrer-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .referrer-bar-wrap {
+      flex: 1;
+      height: 6px;
+      background: var(--bg3);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .referrer-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    .referrer-name {
+      font-size: 0.8rem;
+      color: var(--text2);
+      min-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .referrer-count {
+      font-size: 0.8rem;
+      color: var(--text3);
+      min-width: 30px;
+      text-align: right;
+    }
+
+    .short-url-box {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .short-url-box a {
+      color: var(--accent2);
+      text-decoration: none;
+      font-family: monospace;
+      font-size: 0.9rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .short-url-box a:hover { text-decoration: underline; }
+
+    /* ===== Toast notifications ===== */
+    .toast-container {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.875rem 1.25rem;
+      font-size: 0.875rem;
+      color: var(--text);
+      box-shadow: var(--card-shadow);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      max-width: 360px;
+      transform: translateX(100%);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: all;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .toast.toast-success { border-left: 3px solid var(--success); }
+    .toast.toast-error { border-left: 3px solid var(--danger); }
+    .toast.toast-info { border-left: 3px solid var(--accent); }
+
+    .toast-icon { font-size: 1rem; flex-shrink: 0; }
+
+    /* ===== Loading spinner ===== */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== Skeleton loading ===== */
+    .skeleton {
+      background: linear-gradient(90deg, var(--bg3) 25%, var(--border) 50%, var(--bg3) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 4px;
+      height: 14px;
+    }
+
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      .create-form {
+        grid-template-columns: 1fr;
+      }
+
+      .advanced-fields {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .analytics-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-user span { display: none; }
+    }
+
+    /* ===== Utilidades ===== */
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .gap-2 { gap: 0.5rem; }
+    .mt-1 { margin-top: 0.25rem; }
+    .text-sm { font-size: 0.875rem; }
+    .text-xs { font-size: 0.75rem; }
+    .text-muted { color: var(--text2); }
+    .text-danger { color: var(--danger); }
+    .text-success { color: var(--success); }
+    .font-mono { font-family: 'SF Mono', 'Fira Code', monospace; }
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  </style>
+</head>
+<body>
+
+  <!-- ===== PANTALLA DE LOGIN ===== -->
+  <div id="login-screen">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="logo-mark">&#128279;</div>
+        <h1>Shortr</h1>
+        <p>URL Shortener con Analytics</p>
+      </div>
+
+      <div id="login-error"></div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Usuario</label>
+          <input type="text" id="username" autocomplete="username" placeholder="admin" required />
+        </div>
+        <div class="form-group">
+          <label for="password">Contrasena</label>
+          <input type="password" id="password" autocomplete="current-password" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="login-btn">
+          Iniciar sesion
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== APP PRINCIPAL ===== -->
+  <div id="app">
+    <!-- Navbar -->
+    <nav class="navbar">
+      <a href="#" class="nav-brand">
+        <div class="nav-logo-mark">&#128279;</div>
+        <span>Shortr</span>
+      </a>
+      <div class="nav-actions">
+        <div class="nav-user">
+          <div class="nav-avatar" id="nav-avatar">A</div>
+          <span id="nav-username">admin</span>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="logout-btn">
+          Cerrar sesion
+        </button>
+      </div>
+    </nav>
+
+    <div class="main-content">
+      <!-- Stats Cards -->
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon purple">&#128279;</div>
+          <div class="stat-value" id="stat-total-links">--</div>
+          <div class="stat-label">Total de Links</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">&#128432;</div>
+          <div class="stat-value" id="stat-total-clicks">--</div>
+          <div class="stat-label">Clicks Totales</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">&#8679;</div>
+          <div class="stat-value" id="stat-clicks-today">--</div>
+          <div class="stat-label">Clicks Hoy</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon amber">&#9889;</div>
+          <div class="stat-value" id="stat-active-links">--</div>
+          <div class="stat-label">Links Activos</div>
+        </div>
+      </div>
+
+      <!-- Panel de crear link -->
+      <div class="create-panel">
+        <div class="panel-header">
+          <h2>Acortar URL</h2>
+          <button class="advanced-toggle" id="advanced-toggle">
+            <span>&#9660;</span> Opciones avanzadas
+          </button>
+        </div>
+
+        <form id="create-form">
+          <div class="create-form">
+            <div class="form-group">
+              <label for="new-url">URL a acortar *</label>
+              <input
+                type="url"
+                id="new-url"
+                placeholder="https://ejemplo.com/pagina-muy-larga"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <button type="submit" class="btn btn-primary" id="create-btn">
+                Acortar
+              </button>
+            </div>
+          </div>
+
+          <div class="advanced-fields" id="advanced-fields">
+            <div class="form-group">
+              <label for="new-alias">Alias personalizado</label>
+              <input
+                type="text"
+                id="new-alias"
+                placeholder="mi-link-corto"
+                pattern="[a-zA-Z0-9_-]{2,30}"
+              />
+            </div>
+            <div class="form-group">
+              <label for="new-expires">Fecha de expiracion</label>
+              <input type="datetime-local" id="new-expires" />
+            </div>
+          </div>
+        </form>
+
+        <!-- URL creada (resultado) -->
+        <div id="create-result" style="display:none; margin-top:1rem;">
+          <div class="short-url-box">
+            <a href="#" id="result-url" target="_blank" rel="noopener">...</a>
+            <button class="btn btn-ghost btn-sm" id="copy-result-btn">
+              Copiar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla de links -->
+      <div class="links-panel">
+        <div class="panel-header">
+          <h2>Mis Links</h2>
+          <button class="btn btn-ghost btn-sm" id="refresh-btn">
+            &#8635; Actualizar
+          </button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Alias</th>
+                <th>URL Original</th>
+                <th>Clicks</th>
+                <th>Estado</th>
+                <th>Creado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="links-tbody">
+              <tr>
+                <td colspan="6">
+                  <div class="empty-state">
+                    <div class="empty-icon">&#128279;</div>
+                    <p>Cargando links...</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL DE ANALYTICS ===== -->
+  <div class="modal-overlay" id="analytics-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">
+          <h3 id="modal-link-title">Analytics</h3>
+          <p id="modal-link-sub"></p>
+        </div>
+        <button class="modal-close" id="modal-close">&#215;</button>
+      </div>
+      <div class="modal-body">
+        <div class="short-url-box" id="modal-short-url-box" style="display:none;">
+          <a href="#" id="modal-short-url" target="_blank" rel="noopener"></a>
+          <button class="btn btn-ghost btn-sm" id="modal-copy-btn">Copiar</button>
+        </div>
+
+        <div class="analytics-stats">
+          <div class="analytics-stat">
+            <div class="value" id="modal-total-clicks">--</div>
+            <div class="label">Clicks Totales</div>
+          </div>
+          <div class="analytics-stat">
+            <div class="value" id="modal-clicks-today">--</div>
+            <div class="label">Clicks Hoy</div>
+          </div>
+          <div class="analytics-stat">
+            <div class="value" id="modal-avg-clicks">--</div>
+            <div class="label">Promedio Diario</div>
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <canvas id="analytics-chart"></canvas>
+        </div>
+
+        <div class="referrers-section" id="referrers-section" style="display:none;">
+          <h4>Top Referrers</h4>
+          <div class="referrer-list" id="referrer-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Toast container ===== -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    // ═══════════════════════════════════════════════════════════
+    // ESTADO GLOBAL
+    // ═══════════════════════════════════════════════════════════
+    const state = {
+      token: localStorage.getItem('shortr_token') || null,
+      username: localStorage.getItem('shortr_username') || null,
+      links: [],
+      analyticsChart: null,
+    };
+
+    // ═══════════════════════════════════════════════════════════
+    // UTILIDADES
+    // ═══════════════════════════════════════════════════════════
+
+    function toast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      const icons = { success: '✓', error: '✕', info: 'ℹ' };
+      t.className = `toast toast-${type}`;
+      t.innerHTML = `
+        <span class="toast-icon">${icons[type] || icons.info}</span>
+        <span>${message}</span>
+      `;
+      container.appendChild(t);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => t.classList.add('show'));
+      });
+      setTimeout(() => {
+        t.classList.remove('show');
+        setTimeout(() => t.remove(), 350);
+      }, 3500);
+    }
+
+    function formatNumber(n) {
+      if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+      if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+      return String(n);
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    function formatDateTime(iso) {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      return d.toLocaleString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function copyToClipboard(text, btnEl) {
+      navigator.clipboard.writeText(text).then(() => {
+        const original = btnEl.textContent;
+        btnEl.textContent = 'Copiado!';
+        btnEl.style.color = 'var(--success)';
+        setTimeout(() => {
+          btnEl.textContent = original;
+          btnEl.style.color = '';
+        }, 2000);
+        toast('URL copiada al portapapeles', 'success');
+      }).catch(() => {
+        toast('No se pudo copiar. Copia manualmente.', 'error');
+      });
+    }
+
+    async function apiFetch(path, options = {}) {
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(state.token ? { 'Authorization': `Bearer ${state.token}` } : {}),
+        ...(options.headers || {}),
+      };
+      const res = await fetch(path, { ...options, headers });
+      const data = await res.json().catch(() => ({ error: 'Respuesta inválida del servidor' }));
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      return data;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // AUTENTICACIÓN
+    // ═══════════════════════════════════════════════════════════
+
+    function showApp() {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      document.getElementById('nav-username').textContent = state.username || 'admin';
+      const initial = (state.username || 'A')[0].toUpperCase();
+      document.getElementById('nav-avatar').textContent = initial;
+      loadDashboard();
+    }
+
+    function showLogin() {
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('app').style.display = 'none';
+    }
+
+    function logout() {
+      state.token = null;
+      state.username = null;
+      localStorage.removeItem('shortr_token');
+      localStorage.removeItem('shortr_username');
+      showLogin();
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      const errorEl = document.getElementById('login-error');
+      errorEl.style.display = 'none';
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Iniciando...';
+
+      try {
+        const data = await apiFetch('/api/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ username, password }),
+        });
+
+        state.token = data.token;
+        state.username = data.username;
+        localStorage.setItem('shortr_token', data.token);
+        localStorage.setItem('shortr_username', data.username);
+
+        showApp();
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Iniciar sesion';
+      }
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', logout);
+
+    // ═══════════════════════════════════════════════════════════
+    // DASHBOARD — CARGA DE DATOS
+    // ═══════════════════════════════════════════════════════════
+
+    async function loadDashboard() {
+      await Promise.all([loadStats(), loadLinks()]);
+    }
+
+    async function loadStats() {
+      try {
+        const data = await apiFetch('/api/analytics/summary');
+        document.getElementById('stat-total-links').textContent = formatNumber(data.total_links);
+        document.getElementById('stat-total-clicks').textContent = formatNumber(data.total_clicks);
+        document.getElementById('stat-clicks-today').textContent = formatNumber(data.clicks_today);
+        document.getElementById('stat-active-links').textContent = formatNumber(data.active_links);
+      } catch (err) {
+        if (err.message.includes('401') || err.message.includes('Token')) {
+          logout();
+          return;
+        }
+        console.error('Error cargando stats:', err.message);
+      }
+    }
+
+    async function loadLinks() {
+      const tbody = document.getElementById('links-tbody');
+
+      try {
+        const data = await apiFetch('/api/links');
+        state.links = data.links;
+        renderLinks(data.links);
+      } catch (err) {
+        if (err.message.includes('401') || err.message.includes('Token')) {
+          logout();
+          return;
+        }
+        tbody.innerHTML = `
+          <tr><td colspan="6">
+            <div class="empty-state">
+              <div class="empty-icon">&#9888;</div>
+              <p style="color:var(--danger)">Error cargando links: ${err.message}</p>
+            </div>
+          </td></tr>
+        `;
+      }
+    }
+
+    function renderLinks(links) {
+      const tbody = document.getElementById('links-tbody');
+
+      if (!links || links.length === 0) {
+        tbody.innerHTML = `
+          <tr><td colspan="6">
+            <div class="empty-state">
+              <div class="empty-icon">&#128279;</div>
+              <p>No tienes links todavia. Crea uno arriba.</p>
+            </div>
+          </td></tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = links.map(link => {
+        const isExpired = link.is_expired;
+        const status = !link.is_active
+          ? '<span class="badge badge-danger">Inactivo</span>'
+          : isExpired
+            ? '<span class="badge badge-warning">Expirado</span>'
+            : '<span class="badge badge-success">Activo</span>';
+
+        const expiresInfo = link.expires_at
+          ? `<br><span class="text-xs text-muted">Expira: ${formatDate(link.expires_at)}</span>`
+          : '';
+
+        return `
+          <tr>
+            <td>
+              <span class="link-code">${escHtml(link.code)}</span>
+            </td>
+            <td>
+              <div class="link-original" title="${escHtml(link.original_url)}">
+                ${escHtml(link.original_url)}
+              </div>
+            </td>
+            <td>
+              <strong>${formatNumber(link.click_count)}</strong>
+            </td>
+            <td>
+              ${status}
+              ${expiresInfo}
+            </td>
+            <td>
+              <span class="text-sm text-muted">${formatDate(link.created_at)}</span>
+            </td>
+            <td>
+              <div class="actions-cell">
+                <button
+                  class="btn-icon"
+                  title="Copiar URL corta"
+                  onclick="copyToClipboard('${escHtml(link.short_url)}', this)"
+                >&#128203;</button>
+                <button
+                  class="btn-icon analytics"
+                  title="Ver analytics"
+                  onclick="openAnalytics('${escHtml(link.code)}')"
+                >&#128200;</button>
+                <button
+                  class="btn-icon danger"
+                  title="Eliminar link"
+                  onclick="deleteLink(${link.id}, '${escHtml(link.code)}')"
+                >&#128465;</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // CREAR LINK
+    // ═══════════════════════════════════════════════════════════
+
+    document.getElementById('advanced-toggle').addEventListener('click', () => {
+      const fields = document.getElementById('advanced-fields');
+      fields.classList.toggle('visible');
+    });
+
+    document.getElementById('create-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('create-btn');
+      const url = document.getElementById('new-url').value.trim();
+      const alias = document.getElementById('new-alias').value.trim();
+      const expiresAt = document.getElementById('new-expires').value;
+
+      if (!url) return;
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>';
+
+      const body = { url };
+      if (alias) body.alias = alias;
+      if (expiresAt) body.expiresAt = new Date(expiresAt).toISOString();
+
+      try {
+        const data = await apiFetch('/api/links', {
+          method: 'POST',
+          body: JSON.stringify(body),
+        });
+
+        // Mostrar resultado
+        const resultDiv = document.getElementById('create-result');
+        const resultUrl = document.getElementById('result-url');
+        resultUrl.href = data.short_url;
+        resultUrl.textContent = data.short_url;
+        resultDiv.style.display = 'block';
+
+        // Limpiar formulario
+        document.getElementById('new-url').value = '';
+        document.getElementById('new-alias').value = '';
+        document.getElementById('new-expires').value = '';
+
+        toast(`Link creado: ${data.short_url}`, 'success');
+        loadDashboard();
+      } catch (err) {
+        toast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Acortar';
+      }
+    });
+
+    document.getElementById('copy-result-btn').addEventListener('click', function() {
+      const url = document.getElementById('result-url').textContent;
+      copyToClipboard(url, this);
+    });
+
+    // ═══════════════════════════════════════════════════════════
+    // ELIMINAR LINK
+    // ═══════════════════════════════════════════════════════════
+
+    async function deleteLink(id, code) {
+      if (!confirm(`¿Eliminar el link "/${code}"? Esta accion no se puede deshacer.`)) return;
+
+      try {
+        await apiFetch(`/api/links/${id}`, { method: 'DELETE' });
+        toast(`Link "/${code}" eliminado`, 'success');
+        loadDashboard();
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // ANALYTICS MODAL
+    // ═══════════════════════════════════════════════════════════
+
+    async function openAnalytics(code) {
+      const modal = document.getElementById('analytics-modal');
+      modal.classList.add('active');
+
+      document.getElementById('modal-link-title').textContent = `/${code}`;
+      document.getElementById('modal-link-sub').textContent = 'Cargando datos...';
+      document.getElementById('modal-total-clicks').textContent = '--';
+      document.getElementById('modal-clicks-today').textContent = '--';
+      document.getElementById('modal-avg-clicks').textContent = '--';
+      document.getElementById('modal-short-url-box').style.display = 'none';
+      document.getElementById('referrers-section').style.display = 'none';
+
+      // Destruir chart anterior
+      if (state.analyticsChart) {
+        state.analyticsChart.destroy();
+        state.analyticsChart = null;
+      }
+
+      try {
+        const data = await apiFetch(`/api/analytics/${code}`);
+
+        document.getElementById('modal-link-title').textContent = `/${data.link.code}`;
+        document.getElementById('modal-link-sub').textContent = data.link.original_url.length > 60
+          ? data.link.original_url.slice(0, 60) + '...'
+          : data.link.original_url;
+
+        // Stats
+        document.getElementById('modal-total-clicks').textContent = formatNumber(data.total_clicks);
+        document.getElementById('modal-clicks-today').textContent = formatNumber(data.clicks_today);
+
+        // Promedio diario (últimos 30 días)
+        const avg = data.clicks_by_day.length > 0
+          ? Math.round(data.clicks_by_day.reduce((s, d) => s + d.clicks, 0) / data.clicks_by_day.length)
+          : 0;
+        document.getElementById('modal-avg-clicks').textContent = formatNumber(avg);
+
+        // URL corta
+        const shortUrlBox = document.getElementById('modal-short-url-box');
+        const shortUrlLink = document.getElementById('modal-short-url');
+        shortUrlLink.href = data.link.short_url;
+        shortUrlLink.textContent = data.link.short_url;
+        shortUrlBox.style.display = 'flex';
+
+        // Grafica de barras
+        const ctx = document.getElementById('analytics-chart').getContext('2d');
+        const labels = data.clicks_by_day.map(d => {
+          const date = new Date(d.day + 'T12:00:00');
+          return date.toLocaleDateString('es-MX', { month: 'short', day: 'numeric' });
+        });
+        const values = data.clicks_by_day.map(d => d.clicks);
+
+        state.analyticsChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [{
+              label: 'Clicks',
+              data: values,
+              backgroundColor: 'rgba(124, 106, 247, 0.5)',
+              borderColor: 'rgba(124, 106, 247, 0.9)',
+              borderWidth: 1,
+              borderRadius: 4,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: '#1e1e2a',
+                borderColor: '#2a2a3a',
+                borderWidth: 1,
+                titleColor: '#e2e8f0',
+                bodyColor: '#94a3b8',
+                callbacks: {
+                  title: (items) => items[0].label,
+                  label: (item) => ` ${item.raw} click${item.raw !== 1 ? 's' : ''}`,
+                }
+              }
+            },
+            scales: {
+              x: {
+                grid: { color: 'rgba(255,255,255,0.04)' },
+                ticks: {
+                  color: '#64748b',
+                  font: { size: 10 },
+                  maxTicksLimit: 10,
+                }
+              },
+              y: {
+                grid: { color: 'rgba(255,255,255,0.04)' },
+                ticks: {
+                  color: '#64748b',
+                  font: { size: 11 },
+                  precision: 0,
+                },
+                beginAtZero: true,
+              }
+            }
+          }
+        });
+
+        // Referrers
+        if (data.top_referrers && data.top_referrers.length > 0) {
+          const maxClicks = Math.max(...data.top_referrers.map(r => r.count));
+          const listEl = document.getElementById('referrer-list');
+          listEl.innerHTML = data.top_referrers.map(r => `
+            <div class="referrer-item">
+              <span class="referrer-name" title="${escHtml(r.referrer)}">${escHtml(r.referrer)}</span>
+              <div class="referrer-bar-wrap">
+                <div class="referrer-bar" style="width: ${maxClicks > 0 ? (r.count / maxClicks * 100) : 0}%"></div>
+              </div>
+              <span class="referrer-count">${r.count}</span>
+            </div>
+          `).join('');
+          document.getElementById('referrers-section').style.display = 'block';
+        }
+
+      } catch (err) {
+        document.getElementById('modal-link-sub').textContent = 'Error: ' + err.message;
+        toast(err.message, 'error');
+      }
+    }
+
+    document.getElementById('modal-close').addEventListener('click', () => {
+      document.getElementById('analytics-modal').classList.remove('active');
+    });
+
+    document.getElementById('analytics-modal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('analytics-modal')) {
+        document.getElementById('analytics-modal').classList.remove('active');
+      }
+    });
+
+    document.getElementById('modal-copy-btn').addEventListener('click', function() {
+      const url = document.getElementById('modal-short-url').textContent;
+      copyToClipboard(url, this);
+    });
+
+    // ═══════════════════════════════════════════════════════════
+    // REFRESH
+    // ═══════════════════════════════════════════════════════════
+
+    document.getElementById('refresh-btn').addEventListener('click', () => {
+      loadDashboard();
+      toast('Lista actualizada', 'info');
+    });
+
+    // ═══════════════════════════════════════════════════════════
+    // INICIALIZACIÓN
+    // ═══════════════════════════════════════════════════════════
+
+    // Comprobar si hay sesion activa guardada
+    if (state.token) {
+      showApp();
+    } else {
+      showLogin();
+    }
+  </script>
+</body>
+</html>

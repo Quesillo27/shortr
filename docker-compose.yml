@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  shortr:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - shortr_data:/data
+    environment:
+      - JWT_SECRET=cambia-esto-por-un-secreto-seguro
+      - ADMIN_PASSWORD=cambia-esto
+      - ADMIN_USER=admin
+      - BASE_URL=http://localhost:3000
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/analytics/summary", "--header", "Authorization: Bearer skip"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  shortr_data:
+    driver: local
