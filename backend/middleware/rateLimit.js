@@ -26,7 +26,7 @@ const loginLimiter = rateLimit({
 // Límite para los redirects (más permisivo, son clics reales)
 const redirectLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minuto
-  max: 60,
+  max: 120,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Demasiados redirects. Intenta de nuevo en un momento.' }

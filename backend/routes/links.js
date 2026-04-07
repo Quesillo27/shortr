@@ -11,6 +11,12 @@ const crypto = require('crypto');
 const db = require('../db/database');
 const { verifyToken } = require('../middleware/auth');
 
+// Alias reservados que no pueden usarse como código corto
+const RESERVED_CODES = new Set([
+  'api', 'admin', 'auth', 'analytics', 'health', 'login', 'logout',
+  'register', 'static', 'public', 'assets', 'favicon.ico', 'robots.txt'
+]);
+
 // Generador de código corto usando crypto (sin dependencias ES modules)
 function generateCode(length = 6) {
   return crypto.randomBytes(length).toString('base64url').slice(0, length);
@@ -52,6 +58,10 @@ router.post('/', verifyToken, (req, res) => {
     return res.status(400).json({
       error: 'El alias solo puede contener letras, números, guiones y guiones bajos (2-30 caracteres)'
     });
+  }
+
+  if (alias && RESERVED_CODES.has(alias.toLowerCase())) {
+    return res.status(400).json({ error: `El alias "${alias}" es una ruta reservada del sistema` });
   }
 
   // Validar fecha de expiración
@@ -117,26 +127,58 @@ router.post('/', verifyToken, (req, res) => {
 
 /**
  * GET /api/links
- * Lista todos los links con su conteo de clicks.
+ * Lista links con paginación y búsqueda.
+ * Query params: page (default 1), limit (default 20, max 100), search (filtra por code o URL)
  */
 router.get('/', verifyToken, (req, res) => {
+  const page = Math.max(1, parseInt(req.query.page) || 1);
+  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+  const offset = (page - 1) * limit;
+  const search = req.query.search ? req.query.search.trim() : null;
+
   try {
+    const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+
+    if (search) {
+      const pattern = `%${search}%`;
+      const total = db.prepare(
+        'SELECT COUNT(*) AS count FROM links WHERE code LIKE ? OR original_url LIKE ?'
+      ).get(pattern, pattern);
+
+      const links = db.prepare(`
+        SELECT l.id, l.code, l.original_url, l.created_at, l.expires_at, l.is_active,
+          COUNT(c.id) AS click_count
+        FROM links l
+        LEFT JOIN clicks c ON c.link_id = l.id
+        WHERE l.code LIKE ? OR l.original_url LIKE ?
+        GROUP BY l.id
+        ORDER BY l.created_at DESC
+        LIMIT ? OFFSET ?
+      `).all(pattern, pattern, limit, offset);
+
+      const enriched = links.map(link => ({
+        ...link,
+        short_url: `${baseUrl}/${link.code}`,
+        is_expired: link.expires_at ? new Date(link.expires_at) < new Date() : false
+      }));
+
+      return res.json({
+        links: enriched,
+        pagination: { total: total.count, page, limit, pages: Math.ceil(total.count / limit) }
+      });
+    }
+
+    const total = db.prepare('SELECT COUNT(*) AS count FROM links').get();
+
     const links = db.prepare(`
-      SELECT
-        l.id,
-        l.code,
-        l.original_url,
-        l.created_at,
-        l.expires_at,
-        l.is_active,
+      SELECT l.id, l.code, l.original_url, l.created_at, l.expires_at, l.is_active,
         COUNT(c.id) AS click_count
       FROM links l
       LEFT JOIN clicks c ON c.link_id = l.id
       GROUP BY l.id
       ORDER BY l.created_at DESC
-    `).all();
-
-    const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+      LIMIT ? OFFSET ?
+    `).all(limit, offset);
 
     const enriched = links.map(link => ({
       ...link,
@@ -144,9 +186,38 @@ router.get('/', verifyToken, (req, res) => {
       is_expired: link.expires_at ? new Date(link.expires_at) < new Date() : false
     }));
 
-    res.json({ links: enriched });
+    res.json({
+      links: enriched,
+      pagination: { total: total.count, page, limit, pages: Math.ceil(total.count / limit) }
+    });
   } catch (err) {
     console.error('Error listando links:', err.message);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+/**
+ * PATCH /api/links/:id/toggle
+ * Activa o desactiva un link.
+ */
+router.patch('/:id/toggle', verifyToken, (req, res) => {
+  const { id } = req.params;
+
+  if (!id || isNaN(Number(id))) {
+    return res.status(400).json({ error: 'ID inválido' });
+  }
+
+  try {
+    const link = db.prepare('SELECT id, is_active FROM links WHERE id = ?').get(Number(id));
+    if (!link) {
+      return res.status(404).json({ error: 'Link no encontrado' });
+    }
+
+    const newState = link.is_active ? 0 : 1;
+    db.prepare('UPDATE links SET is_active = ? WHERE id = ?').run(newState, Number(id));
+    res.json({ id: Number(id), is_active: newState });
+  } catch (err) {
+    console.error('Error toggling link:', err.message);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });

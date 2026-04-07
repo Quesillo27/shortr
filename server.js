@@ -26,6 +26,16 @@ const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 
+// Validar BASE_URL si fue provisto explícitamente
+if (process.env.BASE_URL) {
+  try {
+    new URL(process.env.BASE_URL);
+  } catch {
+    console.error('[FATAL] BASE_URL no es una URL válida:', process.env.BASE_URL);
+    process.exit(1);
+  }
+}
+
 // ─── Inicialización de la DB (antes de montar rutas) ─────────────────────────
 const db = require('./backend/db/database');
 
@@ -49,13 +59,23 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', origin || '*');
   }
 
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
     return res.sendStatus(204);
   }
   next();
+});
+
+// ─── Health check ────────────────────────────────────────────────────────────
+app.get('/health', (req, res) => {
+  try {
+    db.prepare('SELECT 1').get();
+    res.json({ status: 'ok', uptime: Math.floor(process.uptime()), timestamp: new Date().toISOString() });
+  } catch (err) {
+    res.status(503).json({ status: 'error', error: err.message });
+  }
 });
 
 // ─── Archivos estáticos ───────────────────────────────────────────────────────

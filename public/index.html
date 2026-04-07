@@ -818,6 +818,59 @@
       .nav-user span { display: none; }
     }
 
+    /* ===== Búsqueda ===== */
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      max-width: 280px;
+    }
+    .search-wrap input {
+      width: 100%;
+      padding: 0.45rem 0.75rem 0.45rem 2rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+    .search-wrap input:focus { border-color: var(--accent); }
+    .search-wrap .search-icon {
+      position: absolute;
+      left: 0.55rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text3);
+      font-size: 0.85rem;
+      pointer-events: none;
+    }
+
+    /* ===== Paginación ===== */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--text2);
+    }
+    .pagination-controls { display: flex; gap: 0.4rem; align-items: center; }
+    .btn-page {
+      padding: 0.3rem 0.65rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .btn-page:hover:not(:disabled) { background: var(--border); border-color: var(--accent); }
+    .btn-page:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn-page.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
     /* ===== Utilidades ===== */
     .flex { display: flex; }
     .items-center { align-items: center; }
@@ -965,9 +1018,15 @@
       <div class="links-panel">
         <div class="panel-header">
           <h2>Mis Links</h2>
-          <button class="btn btn-ghost btn-sm" id="refresh-btn">
-            &#8635; Actualizar
-          </button>
+          <div class="flex items-center gap-2">
+            <div class="search-wrap">
+              <span class="search-icon">&#128269;</span>
+              <input type="text" id="search-input" placeholder="Buscar por alias o URL..." />
+            </div>
+            <button class="btn btn-ghost btn-sm" id="refresh-btn">
+              &#8635; Actualizar
+            </button>
+          </div>
         </div>
 
         <div class="table-wrap">
@@ -993,6 +1052,10 @@
               </tr>
             </tbody>
           </table>
+        </div>
+        <div class="pagination" id="pagination" style="display:none;">
+          <span id="pagination-info">—</span>
+          <div class="pagination-controls" id="pagination-controls"></div>
         </div>
       </div>
     </div>
@@ -1053,6 +1116,11 @@
       username: localStorage.getItem('shortr_username') || null,
       links: [],
       analyticsChart: null,
+      page: 1,
+      limit: 20,
+      search: '',
+      totalLinks: 0,
+      totalPages: 1,
     };
 
     // ═══════════════════════════════════════════════════════════
@@ -1212,9 +1280,16 @@
       const tbody = document.getElementById('links-tbody');
 
       try {
-        const data = await apiFetch('/api/links');
+        const params = new URLSearchParams({ page: state.page, limit: state.limit });
+        if (state.search) params.set('search', state.search);
+        const data = await apiFetch(`/api/links?${params}`);
         state.links = data.links;
+        if (data.pagination) {
+          state.totalLinks = data.pagination.total;
+          state.totalPages = data.pagination.pages;
+        }
         renderLinks(data.links);
+        renderPagination();
       } catch (err) {
         if (err.message.includes('401') || err.message.includes('Token')) {
           logout();
@@ -1290,6 +1365,12 @@
                   title="Ver analytics"
                   onclick="openAnalytics('${escHtml(link.code)}')"
                 >&#128200;</button>
+                <button
+                  class="btn-icon"
+                  title="${link.is_active ? 'Desactivar link' : 'Activar link'}"
+                  style="color: ${link.is_active ? 'var(--warning)' : 'var(--success)'}"
+                  onclick="toggleLink(${link.id})"
+                >${link.is_active ? '&#9646;&#9646;' : '&#9654;'}</button>
                 <button
                   class="btn-icon danger"
                   title="Eliminar link"
@@ -1368,6 +1449,69 @@
       const url = document.getElementById('result-url').textContent;
       copyToClipboard(url, this);
     });
+
+    // ═══════════════════════════════════════════════════════════
+    // PAGINACIÓN
+    // ═══════════════════════════════════════════════════════════
+
+    function renderPagination() {
+      const paginationEl = document.getElementById('pagination');
+      const infoEl = document.getElementById('pagination-info');
+      const controlsEl = document.getElementById('pagination-controls');
+
+      if (state.totalLinks === 0) {
+        paginationEl.style.display = 'none';
+        return;
+      }
+
+      paginationEl.style.display = 'flex';
+      const from = (state.page - 1) * state.limit + 1;
+      const to = Math.min(state.page * state.limit, state.totalLinks);
+      infoEl.textContent = `${from}–${to} de ${state.totalLinks} links`;
+
+      const pages = state.totalPages;
+      let html = `<button class="btn-page" ${state.page <= 1 ? 'disabled' : ''} onclick="goToPage(${state.page - 1})">&#8249;</button>`;
+
+      const range = [];
+      for (let i = 1; i <= pages; i++) {
+        if (i === 1 || i === pages || (i >= state.page - 1 && i <= state.page + 1)) {
+          range.push(i);
+        } else if (range[range.length - 1] !== '...') {
+          range.push('...');
+        }
+      }
+
+      range.forEach(p => {
+        if (p === '...') {
+          html += `<span style="color:var(--text3);padding:0 0.2rem">…</span>`;
+        } else {
+          html += `<button class="btn-page ${p === state.page ? 'active' : ''}" onclick="goToPage(${p})">${p}</button>`;
+        }
+      });
+
+      html += `<button class="btn-page" ${state.page >= pages ? 'disabled' : ''} onclick="goToPage(${state.page + 1})">&#8250;</button>`;
+      controlsEl.innerHTML = html;
+    }
+
+    function goToPage(page) {
+      state.page = page;
+      loadLinks();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // TOGGLE ACTIVO / INACTIVO
+    // ═══════════════════════════════════════════════════════════
+
+    async function toggleLink(id) {
+      try {
+        const data = await apiFetch(`/api/links/${id}/toggle`, { method: 'PATCH' });
+        const label = data.is_active ? 'activado' : 'desactivado';
+        toast(`Link ${label}`, data.is_active ? 'success' : 'info');
+        loadDashboard();
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    }
 
     // ═══════════════════════════════════════════════════════════
     // ELIMINAR LINK
@@ -1530,12 +1674,51 @@
     });
 
     // ═══════════════════════════════════════════════════════════
+    // BÚSQUEDA
+    // ═══════════════════════════════════════════════════════════
+
+    let searchDebounce = null;
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      clearTimeout(searchDebounce);
+      searchDebounce = setTimeout(() => {
+        state.search = e.target.value.trim();
+        state.page = 1;
+        loadLinks();
+      }, 300);
+    });
+
+    // ═══════════════════════════════════════════════════════════
     // REFRESH
     // ═══════════════════════════════════════════════════════════
 
     document.getElementById('refresh-btn').addEventListener('click', () => {
       loadDashboard();
       toast('Lista actualizada', 'info');
+    });
+
+    // Auto-refresh de stats cada 60 segundos (solo cuando la app está visible)
+    setInterval(() => {
+      if (state.token && document.getElementById('app').style.display !== 'none') {
+        loadStats();
+      }
+    }, 60000);
+
+    // ═══════════════════════════════════════════════════════════
+    // VALIDACIÓN DE FECHA EN FORMULARIO
+    // ═══════════════════════════════════════════════════════════
+
+    document.getElementById('new-expires').addEventListener('change', (e) => {
+      if (e.target.value && new Date(e.target.value) <= new Date()) {
+        toast('La fecha de expiración debe ser en el futuro', 'error');
+        e.target.value = '';
+      }
+    });
+
+    // Establecer mínimo de fecha/hora al abrir el input
+    document.getElementById('new-expires').addEventListener('focus', (e) => {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() + 1);
+      e.target.min = now.toISOString().slice(0, 16);
     });
 
     // ═══════════════════════════════════════════════════════════
