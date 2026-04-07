@@ -818,6 +818,36 @@
       .nav-user span { display: none; }
     }
 
+    /* ===== Panel de actividad global ===== */
+    .activity-panel {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .activity-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.6rem;
+    }
+    .activity-header h3 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text2);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    .activity-header .activity-total {
+      font-size: 0.8rem;
+      color: var(--text3);
+    }
+    .activity-chart-wrap {
+      height: 72px;
+      position: relative;
+    }
+
     /* ===== Búsqueda ===== */
     .search-wrap {
       position: relative;
@@ -955,6 +985,17 @@
           <div class="stat-icon amber">&#9889;</div>
           <div class="stat-value" id="stat-active-links">--</div>
           <div class="stat-label">Links Activos</div>
+        </div>
+      </div>
+
+      <!-- Gráfica de actividad global -->
+      <div class="activity-panel">
+        <div class="activity-header">
+          <h3>&#128200; Actividad — últimos 14 días</h3>
+          <span class="activity-total" id="activity-total"></span>
+        </div>
+        <div class="activity-chart-wrap">
+          <canvas id="activity-chart"></canvas>
         </div>
       </div>
 
@@ -1116,6 +1157,7 @@
       username: localStorage.getItem('shortr_username') || null,
       links: [],
       analyticsChart: null,
+      activityChart: null,
       page: 1,
       limit: 20,
       search: '',
@@ -1267,6 +1309,10 @@
         document.getElementById('stat-total-clicks').textContent = formatNumber(data.total_clicks);
         document.getElementById('stat-clicks-today').textContent = formatNumber(data.clicks_today);
         document.getElementById('stat-active-links').textContent = formatNumber(data.active_links);
+
+        if (data.clicks_by_day) {
+          renderActivityChart(data.clicks_by_day);
+        }
       } catch (err) {
         if (err.message.includes('401') || err.message.includes('Token')) {
           logout();
@@ -1274,6 +1320,92 @@
         }
         console.error('Error cargando stats:', err.message);
       }
+    }
+
+    function renderActivityChart(days) {
+      const total = days.reduce((s, d) => s + d.clicks, 0);
+      const maxDay = days.reduce((m, d) => d.clicks > m.clicks ? d : m, days[0]);
+
+      document.getElementById('activity-total').textContent =
+        total > 0
+          ? `${formatNumber(total)} clicks · pico: ${maxDay.clicks} el ${formatDateTime(maxDay.day + 'T12:00:00')}`
+          : 'Sin clicks en este período';
+
+      const labels = days.map(d => {
+        const date = new Date(d.day + 'T12:00:00');
+        return date.toLocaleDateString('es-MX', { month: 'short', day: 'numeric' });
+      });
+      const values = days.map(d => d.clicks);
+
+      // Gradiente de color según valor
+      const maxVal = Math.max(...values, 1);
+
+      if (state.activityChart) {
+        state.activityChart.data.labels = labels;
+        state.activityChart.data.datasets[0].data = values;
+        state.activityChart.update('none');
+        return;
+      }
+
+      const ctx = document.getElementById('activity-chart').getContext('2d');
+
+      // Gradiente vertical
+      const gradient = ctx.createLinearGradient(0, 0, 0, 72);
+      gradient.addColorStop(0, 'rgba(124, 106, 247, 0.85)');
+      gradient.addColorStop(1, 'rgba(124, 106, 247, 0.25)');
+
+      state.activityChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            data: values,
+            backgroundColor: values.map(v =>
+              v === maxVal && maxVal > 0
+                ? 'rgba(167, 139, 250, 0.95)'
+                : gradient
+            ),
+            borderRadius: 3,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 400 },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#1e1e2a',
+              borderColor: '#2a2a3a',
+              borderWidth: 1,
+              titleColor: '#e2e8f0',
+              bodyColor: '#94a3b8',
+              padding: 8,
+              callbacks: {
+                title: (items) => items[0].label,
+                label: (item) => ` ${item.raw} click${item.raw !== 1 ? 's' : ''}`,
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              border: { display: false },
+              ticks: {
+                color: '#64748b',
+                font: { size: 9 },
+                maxTicksLimit: 7,
+                maxRotation: 0,
+              }
+            },
+            y: {
+              display: false,
+              beginAtZero: true,
+            }
+          }
+        }
+      });
     }
 
     async function loadLinks() {

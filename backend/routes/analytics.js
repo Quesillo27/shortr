@@ -41,12 +41,34 @@ router.get('/summary', verifyToken, (req, res) => {
       LIMIT 5
     `).all();
 
+    // Clicks por día — últimos 14 días (todos los links)
+    const rawDays = db.prepare(`
+      SELECT date(clicked_at) AS day, COUNT(*) AS clicks
+      FROM clicks
+      WHERE clicked_at >= datetime('now', '-13 days')
+      GROUP BY date(clicked_at)
+      ORDER BY day ASC
+    `).all();
+
+    const clickMap = {};
+    rawDays.forEach(r => { clickMap[r.day] = r.clicks; });
+
+    const today = new Date();
+    const clicks_by_day = [];
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const dayStr = d.toISOString().split('T')[0];
+      clicks_by_day.push({ day: dayStr, clicks: clickMap[dayStr] || 0 });
+    }
+
     res.json({
       total_links: totalLinks.count,
       total_clicks: totalClicks.count,
       clicks_today: clicksToday.count,
       active_links: activeLinks.count,
-      top_links: topLinks
+      top_links: topLinks,
+      clicks_by_day
     });
   } catch (err) {
     console.error('Error en summary:', err.message);
