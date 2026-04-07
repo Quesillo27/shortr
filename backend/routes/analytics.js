@@ -143,6 +143,50 @@ router.get('/:code', verifyToken, (req, res) => {
       days.push({ day: dayStr, clicks: clickMap[dayStr] || 0 });
     }
 
+    // Desglose por dispositivo
+    const deviceBreakdown = db.prepare(`
+      SELECT COALESCE(device_type, 'desktop') AS device, COUNT(*) AS count
+      FROM clicks WHERE link_id = ?
+      GROUP BY device_type ORDER BY count DESC
+    `).all(link.id);
+
+    // Desglose por navegador (top 5)
+    const browserBreakdown = db.prepare(`
+      SELECT COALESCE(browser, 'Desconocido') AS browser, COUNT(*) AS count
+      FROM clicks WHERE link_id = ?
+      GROUP BY browser ORDER BY count DESC LIMIT 5
+    `).all(link.id);
+
+    // Desglose por OS (top 5)
+    const osBreakdown = db.prepare(`
+      SELECT COALESCE(os, 'Desconocido') AS os, COUNT(*) AS count
+      FROM clicks WHERE link_id = ?
+      GROUP BY os ORDER BY count DESC LIMIT 5
+    `).all(link.id);
+
+    // Desglose por país (top 8)
+    const countryBreakdown = db.prepare(`
+      SELECT
+        COALESCE(country_code, '??') AS country_code,
+        COALESCE(country, 'Desconocido') AS country,
+        COUNT(*) AS count
+      FROM clicks WHERE link_id = ?
+      GROUP BY country_code ORDER BY count DESC LIMIT 8
+    `).all(link.id);
+
+    // Clicks por hora del día (0-23) — patrón de uso
+    const hourlyBreakdown = db.prepare(`
+      SELECT CAST(strftime('%H', clicked_at) AS INTEGER) AS hour, COUNT(*) AS count
+      FROM clicks WHERE link_id = ?
+      GROUP BY hour ORDER BY hour ASC
+    `).all(link.id);
+
+    const hourMap = {};
+    hourlyBreakdown.forEach(r => { hourMap[r.hour] = r.count; });
+    const clicks_by_hour = Array.from({ length: 24 }, (_, h) => ({
+      hour: h, count: hourMap[h] || 0
+    }));
+
     const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
 
     res.json({
@@ -154,7 +198,12 @@ router.get('/:code', verifyToken, (req, res) => {
       total_clicks: totalClicks.count,
       clicks_today: clicksToday.count,
       clicks_by_day: days,
-      top_referrers: topReferrers
+      top_referrers: topReferrers,
+      device_breakdown: deviceBreakdown,
+      browser_breakdown: browserBreakdown,
+      os_breakdown: osBreakdown,
+      country_breakdown: countryBreakdown,
+      clicks_by_hour
     });
   } catch (err) {
     console.error('Error en analytics:', err.message);

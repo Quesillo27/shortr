@@ -818,6 +818,95 @@
       .nav-user span { display: none; }
     }
 
+    /* ===== Breakdown panels (modal) ===== */
+    .breakdown-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    @media (max-width: 600px) { .breakdown-grid { grid-template-columns: 1fr; } }
+
+    .breakdown-panel {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 1rem;
+    }
+    .breakdown-panel h4 {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.65rem;
+    }
+    .breakdown-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.45rem;
+      font-size: 0.8rem;
+    }
+    .breakdown-item:last-child { margin-bottom: 0; }
+    .breakdown-label {
+      flex: 1;
+      color: var(--text2);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .breakdown-bar-wrap {
+      flex: 2;
+      height: 5px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .breakdown-bar {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width 0.4s ease;
+      min-width: 2px;
+    }
+    .breakdown-count {
+      color: var(--text);
+      font-weight: 600;
+      font-size: 0.78rem;
+      min-width: 28px;
+      text-align: right;
+    }
+    .breakdown-pct {
+      color: var(--text3);
+      font-size: 0.72rem;
+      min-width: 34px;
+      text-align: right;
+    }
+
+    /* Device icons */
+    .device-mobile  { color: #60a5fa; }
+    .device-desktop { color: #34d399; }
+    .device-tablet  { color: #f59e0b; }
+
+    /* Hourly chart */
+    .hourly-wrap {
+      margin-top: 1rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 1rem 0.6rem;
+    }
+    .hourly-wrap h4 {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.65rem;
+    }
+    .hourly-chart-wrap { height: 56px; }
+
     /* ===== Panel de actividad global ===== */
     .activity-panel {
       background: var(--bg2);
@@ -1141,6 +1230,34 @@
           <h4>Top Referrers</h4>
           <div class="referrer-list" id="referrer-list"></div>
         </div>
+
+        <!-- Breakdown grid -->
+        <div class="breakdown-grid" id="breakdown-grid" style="display:none;">
+          <div class="breakdown-panel">
+            <h4>&#128241; Dispositivos</h4>
+            <div id="device-list"></div>
+          </div>
+          <div class="breakdown-panel">
+            <h4>&#127760; Países</h4>
+            <div id="country-list"></div>
+          </div>
+          <div class="breakdown-panel">
+            <h4>&#127758; Navegadores</h4>
+            <div id="browser-list"></div>
+          </div>
+          <div class="breakdown-panel">
+            <h4>&#128187; Sistema Operativo</h4>
+            <div id="os-list"></div>
+          </div>
+        </div>
+
+        <!-- Gráfica horaria -->
+        <div class="hourly-wrap" id="hourly-wrap" style="display:none;">
+          <h4>&#9200; Actividad por hora del día</h4>
+          <div class="hourly-chart-wrap">
+            <canvas id="hourly-chart"></canvas>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1158,6 +1275,7 @@
       links: [],
       analyticsChart: null,
       activityChart: null,
+      hourlyChart: null,
       page: 1,
       limit: 20,
       search: '',
@@ -1677,11 +1795,11 @@
       document.getElementById('modal-short-url-box').style.display = 'none';
       document.getElementById('referrers-section').style.display = 'none';
 
-      // Destruir chart anterior
-      if (state.analyticsChart) {
-        state.analyticsChart.destroy();
-        state.analyticsChart = null;
-      }
+      // Destruir charts anteriores
+      if (state.analyticsChart) { state.analyticsChart.destroy(); state.analyticsChart = null; }
+      if (state.hourlyChart) { state.hourlyChart.destroy(); state.hourlyChart = null; }
+      document.getElementById('breakdown-grid').style.display = 'none';
+      document.getElementById('hourly-wrap').style.display = 'none';
 
       try {
         const data = await apiFetch(`/api/analytics/${code}`);
@@ -1784,10 +1902,127 @@
           document.getElementById('referrers-section').style.display = 'block';
         }
 
+        // Breakdowns enriquecidos (dispositivo, país, navegador, OS)
+        if (data.device_breakdown || data.country_breakdown) {
+          renderBreakdownList('device-list', data.device_breakdown, 'device', 'count',
+            item => DEVICE_ICONS[item.device] || '💻');
+          renderBreakdownList('country-list', data.country_breakdown, 'country', 'count',
+            item => countryFlag(item.country_code));
+          renderBreakdownList('browser-list', data.browser_breakdown, 'browser', 'count',
+            item => BROWSER_ICONS[item.browser] || '🌐');
+          renderBreakdownList('os-list', data.os_breakdown, 'os', 'count', null);
+          document.getElementById('breakdown-grid').style.display = 'grid';
+        }
+
+        // Gráfica horaria
+        if (data.clicks_by_hour) {
+          renderHourlyChart(data.clicks_by_hour);
+        }
+
       } catch (err) {
         document.getElementById('modal-link-sub').textContent = 'Error: ' + err.message;
         toast(err.message, 'error');
       }
+    }
+
+    // ─── Helpers de breakdown ────────────────────────────────────
+
+    function countryFlag(code) {
+      if (!code || code === '??') return '🌐';
+      return code.toUpperCase().replace(/./g, c =>
+        String.fromCodePoint(c.charCodeAt(0) + 127397)
+      );
+    }
+
+    const DEVICE_ICONS = { mobile: '📱', tablet: '📟', desktop: '🖥' };
+    const BROWSER_ICONS = {
+      Chrome: '🟡', Firefox: '🦊', Safari: '🧭', Edge: '🔷',
+      'Samsung Browser': '📱', Opera: '🔴'
+    };
+
+    function renderBreakdownList(containerId, items, labelKey, countKey, iconFn) {
+      const el = document.getElementById(containerId);
+      if (!items || items.length === 0) {
+        el.innerHTML = '<div style="color:var(--text3);font-size:0.78rem">Sin datos</div>';
+        return;
+      }
+      const max = Math.max(...items.map(i => i[countKey]), 1);
+      const total = items.reduce((s, i) => s + i[countKey], 0);
+      el.innerHTML = items.map(item => {
+        const pct = total > 0 ? Math.round(item[countKey] / total * 100) : 0;
+        const icon = iconFn ? iconFn(item) : '';
+        return `
+          <div class="breakdown-item">
+            <span class="breakdown-label" title="${escHtml(String(item[labelKey]))}">
+              ${icon ? `<span style="margin-right:4px">${icon}</span>` : ''}${escHtml(String(item[labelKey]))}
+            </span>
+            <div class="breakdown-bar-wrap">
+              <div class="breakdown-bar" style="width:${item[countKey] / max * 100}%"></div>
+            </div>
+            <span class="breakdown-count">${item[countKey]}</span>
+            <span class="breakdown-pct">${pct}%</span>
+          </div>`;
+      }).join('');
+    }
+
+    function renderHourlyChart(data) {
+      const wrap = document.getElementById('hourly-wrap');
+      const hasData = data.some(d => d.count > 0);
+      if (!hasData) { wrap.style.display = 'none'; return; }
+      wrap.style.display = 'block';
+
+      const labels = data.map(d => d.hour === 0 ? '12am' : d.hour < 12 ? `${d.hour}am` : d.hour === 12 ? '12pm' : `${d.hour - 12}pm`);
+      const values = data.map(d => d.count);
+      const maxVal = Math.max(...values, 1);
+
+      if (state.hourlyChart) {
+        state.hourlyChart.data.labels = labels;
+        state.hourlyChart.data.datasets[0].data = values;
+        state.hourlyChart.update('none');
+        return;
+      }
+
+      const ctx = document.getElementById('hourly-chart').getContext('2d');
+      state.hourlyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            data: values,
+            backgroundColor: values.map(v =>
+              v === maxVal && maxVal > 0 ? 'rgba(167,139,250,0.9)' : 'rgba(124,106,247,0.45)'
+            ),
+            borderRadius: 2,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 300 },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#1e1e2a',
+              borderColor: '#2a2a3a',
+              borderWidth: 1,
+              titleColor: '#e2e8f0',
+              bodyColor: '#94a3b8',
+              callbacks: {
+                label: (item) => ` ${item.raw} click${item.raw !== 1 ? 's' : ''}`,
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              border: { display: false },
+              ticks: { color: '#64748b', font: { size: 8 }, maxRotation: 0 }
+            },
+            y: { display: false, beginAtZero: true }
+          }
+        }
+      });
     }
 
     document.getElementById('modal-close').addEventListener('click', () => {

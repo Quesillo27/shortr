@@ -7,6 +7,8 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const path = require('path');
+const geoip = require('geoip-lite');
+const UAParser = require('ua-parser-js');
 
 // ─── Validación de variables de entorno requeridas ──────────────────────────
 if (!process.env.JWT_SECRET) {
@@ -154,12 +156,22 @@ app.get('/:code', redirectLimiter, (req, res) => {
     const userAgent = (req.headers['user-agent'] || '').slice(0, 512);
     const referrer = (req.headers['referer'] || req.headers['referrer'] || '').slice(0, 512) || null;
 
+    // Enriquecer con geo + UA antes de anonimizar la IP
+    const geo = geoip.lookup(ip);
+    const countryCode = geo ? geo.country : null;
+    const countryName = geo ? (geo.country || null) : null;
+
+    const uaResult = new UAParser(userAgent).getResult();
+    const deviceType = uaResult.device.type || 'desktop';
+    const browser = uaResult.browser.name || null;
+    const os = uaResult.os.name || null;
+
     setImmediate(() => {
       try {
         db.prepare(`
-          INSERT INTO clicks (link_id, ip_hash, user_agent, referrer)
-          VALUES (?, ?, ?, ?)
-        `).run(link.id, ipHash, userAgent, referrer);
+          INSERT INTO clicks (link_id, ip_hash, user_agent, referrer, country_code, country, device_type, browser, os)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(link.id, ipHash, userAgent, referrer, countryCode, countryName, deviceType, browser, os);
       } catch (err) {
         console.error('Error registrando click:', err.message);
       }

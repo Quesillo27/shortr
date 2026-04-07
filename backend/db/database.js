@@ -50,4 +50,19 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_links_created ON links(created_at DESC);
 `);
 
+// Migración: agregar columnas de enriquecimiento de clicks si no existen
+const existingCols = db.prepare('PRAGMA table_info(clicks)').all().map(c => c.name);
+const newCols = [
+  ['country_code', 'TEXT'],
+  ['country',      'TEXT'],
+  ['device_type',  'TEXT'],
+  ['browser',      'TEXT'],
+  ['os',           'TEXT'],
+];
+for (const [col, type] of newCols) {
+  if (!existingCols.includes(col)) {
+    db.exec(`ALTER TABLE clicks ADD COLUMN ${col} ${type}`);
+  }
+}
+
 module.exports = db;
