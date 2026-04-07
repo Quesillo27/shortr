@@ -981,6 +981,99 @@
     }
     .campaign-detail-actions { display: flex; gap: 0.5rem; margin-left: auto; }
 
+    /* ── Status badge ── */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.15rem 0.55rem; border-radius: 999px;
+      font-size: 0.68rem; font-weight: 600; letter-spacing: .03em;
+    }
+    .status-active   { background: rgba(34,197,94,.15);  color: #22c55e; }
+    .status-paused   { background: rgba(245,158,11,.15); color: #f59e0b; }
+    .status-archived { background: rgba(100,116,139,.15);color: #64748b; }
+
+    /* ── Goal progress ── */
+    .goal-bar-wrap {
+      margin-top: 0.55rem;
+      font-size: 0.72rem; color: var(--text3);
+    }
+    .goal-bar-track {
+      height: 4px; background: var(--border); border-radius: 2px;
+      margin-top: 0.3rem; overflow: hidden;
+    }
+    .goal-bar-fill {
+      height: 100%; border-radius: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width .4s ease;
+    }
+
+    /* ── Period selector ── */
+    .period-tabs {
+      display: flex; gap: 0.3rem;
+      background: var(--bg3); border-radius: 8px; padding: 3px;
+      width: fit-content;
+    }
+    .period-tab {
+      padding: .25rem .7rem; border-radius: 6px; border: none;
+      background: transparent; color: var(--text3); font-size: .78rem;
+      cursor: pointer; transition: all var(--transition);
+    }
+    .period-tab:hover { color: var(--text); }
+    .period-tab.active { background: var(--bg2); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+
+    /* ── Change badge ── */
+    .change-badge {
+      font-size: 0.7rem; font-weight: 600; padding: .1rem .35rem;
+      border-radius: 5px; margin-left: .3rem;
+    }
+    .change-up   { background: rgba(34,197,94,.15);  color: #22c55e; }
+    .change-down { background: rgba(239,68,68,.15);  color: #ef4444; }
+    .change-flat { background: rgba(100,116,139,.15);color: #64748b; }
+
+    /* ── Insights panel ── */
+    .insights-panel {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr));
+      gap: .6rem; margin-bottom: 1.25rem;
+    }
+    .insight-card {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: .7rem .9rem;
+    }
+    .insight-card .ins-label {
+      font-size: .68rem; font-weight: 600; color: var(--text3);
+      text-transform: uppercase; letter-spacing: .05em; margin-bottom: .3rem;
+    }
+    .insight-card .ins-value {
+      font-size: .95rem; font-weight: 700; color: var(--text);
+    }
+    .insight-card .ins-sub {
+      font-size: .7rem; color: var(--text3); margin-top: .15rem;
+    }
+
+    /* ── Top links prominente ── */
+    .top-links-panel {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .top-links-panel .panel-header { margin-bottom: .75rem; }
+    .top-link-row {
+      display: flex; align-items: center; gap: .6rem;
+      padding: .45rem 0; border-bottom: 1px solid var(--border);
+      font-size: .8rem;
+    }
+    .top-link-row:last-child { border-bottom: none; }
+    .top-link-rank { font-size: .72rem; font-weight: 700; color: var(--text3); min-width: 18px; }
+    .top-link-code {
+      font-family: 'SF Mono','Fira Code',monospace;
+      color: var(--accent2); min-width: 80px; flex-shrink: 0;
+    }
+    .top-link-url { flex: 1; color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .top-link-right { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
+    .top-link-bar-wrap { width: 60px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .top-link-bar { height: 100%; border-radius: 3px; background: linear-gradient(90deg,var(--accent),var(--accent2)); }
+    .top-link-clicks { font-weight: 600; color: var(--text); min-width: 38px; text-align: right; }
+    .top-link-pct { font-size: .7rem; color: var(--text3); min-width: 28px; text-align: right; }
+
     /* Chart inline para campaña */
     .campaign-chart-panel {
       background: var(--bg2);
@@ -1406,7 +1499,17 @@
           </div>
         </div>
 
-        <!-- Stats de campaña -->
+        <!-- Period selector + stats de campaña -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+          <div class="period-tabs" id="cd-period-tabs">
+            <button class="period-tab" onclick="setCampaignPeriod(7)">7d</button>
+            <button class="period-tab active" onclick="setCampaignPeriod(30)">30d</button>
+            <button class="period-tab" onclick="setCampaignPeriod(90)">90d</button>
+            <button class="period-tab" onclick="setCampaignPeriod('all')">Todo</button>
+          </div>
+          <span id="cd-period-label" style="font-size:.78rem;color:var(--text3)"></span>
+        </div>
+
         <div class="stats-grid" id="cd-stats-grid" style="margin-bottom:1.25rem">
           <div class="stat-card">
             <div class="stat-icon purple">&#128279;</div>
@@ -1428,6 +1531,31 @@
             <div class="stat-value" id="cd-clicks-today">--</div>
             <div class="stat-label">Clicks Hoy</div>
           </div>
+        </div>
+
+        <!-- Goal progress (si hay meta definida) -->
+        <div id="cd-goal-wrap" style="display:none;margin-bottom:1.25rem">
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem 1.25rem">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+              <span style="font-size:.8rem;font-weight:600;color:var(--text2)">&#127945; Meta de campaña</span>
+              <span id="cd-goal-text" style="font-size:.78rem;color:var(--text3)"></span>
+            </div>
+            <div class="goal-bar-track">
+              <div class="goal-bar-fill" id="cd-goal-fill" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Insights automáticos -->
+        <div class="insights-panel" id="cd-insights" style="display:none"></div>
+
+        <!-- Top Links prominente -->
+        <div class="top-links-panel" id="cd-top-links-panel" style="display:none">
+          <div class="panel-header">
+            <h2>Top Links</h2>
+            <span id="cd-top-links-info" style="font-size:.78rem;color:var(--text3)"></span>
+          </div>
+          <div id="cd-top-links-list"></div>
         </div>
 
         <!-- Gráfica 30 días de campaña -->
@@ -1655,6 +1783,18 @@
             <div class="color-swatches" id="color-swatches"></div>
             <input type="hidden" id="camp-color" value="#7c6af7" />
           </div>
+          <div class="form-group">
+            <label for="camp-status">Estado</label>
+            <select id="camp-status">
+              <option value="active">Activa</option>
+              <option value="paused">Pausada</option>
+              <option value="archived">Archivada</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="camp-goal">Meta de clicks (opcional)</label>
+            <input type="number" id="camp-goal" placeholder="Ej: 10000" min="1" />
+          </div>
           <div style="display:flex;gap:0.75rem;margin-top:1rem;">
             <button type="button" class="btn btn-ghost" id="create-campaign-cancel" style="flex:1">Cancelar</button>
             <button type="submit" class="btn btn-primary" style="flex:1" id="create-campaign-btn">Crear campaña</button>
@@ -1678,7 +1818,8 @@
       analyticsChart: null,
       activityChart: null,
       hourlyChart: null,
-      cdChart: null,         // chart inline campaña
+      cdChart: null,
+      campaignPeriod: 30,
       currentSection: 'campaigns',
       currentCampaign: null, // objeto campaña seleccionada
       campaigns: [],
@@ -2136,17 +2277,35 @@
       }
     }
 
+    const STATUS_LABELS = { active: 'Activa', paused: 'Pausada', archived: 'Archivada' };
+    const STATUS_CLASS  = { active: 'status-active', paused: 'status-paused', archived: 'status-archived' };
+
     function renderCampaignGrid() {
       const grid = document.getElementById('campaigns-grid');
       if (!grid) return;
 
-      let html = state.campaigns.map(c => `
+      let html = state.campaigns.map(c => {
+        const statusHtml = `<span class="status-badge ${STATUS_CLASS[c.status || 'active']}">${STATUS_LABELS[c.status || 'active']}</span>`;
+        const goalHtml = c.goal_clicks
+          ? (() => {
+              const pct = Math.min(100, Math.round(c.total_clicks / c.goal_clicks * 100));
+              return `<div class="goal-bar-wrap">
+                <div style="display:flex;justify-content:space-between"><span>Meta: ${formatNumber(c.total_clicks)} / ${formatNumber(c.goal_clicks)}</span><span>${pct}%</span></div>
+                <div class="goal-bar-track"><div class="goal-bar-fill" style="width:${pct}%"></div></div>
+              </div>`;
+            })()
+          : '';
+
+        return `
         <div class="campaign-card" onclick="openCampaign(${c.id})">
           <div class="campaign-card-color" style="background:${escHtml(c.color)}"></div>
           <div class="campaign-card-body">
-            <div class="campaign-card-name">
-              <span style="width:10px;height:10px;border-radius:50%;background:${escHtml(c.color)};flex-shrink:0;display:inline-block"></span>
-              ${escHtml(c.name)}
+            <div class="campaign-card-name" style="justify-content:space-between">
+              <span style="display:flex;align-items:center;gap:.5rem">
+                <span style="width:10px;height:10px;border-radius:50%;background:${escHtml(c.color)};flex-shrink:0;display:inline-block"></span>
+                ${escHtml(c.name)}
+              </span>
+              ${statusHtml}
             </div>
             <div class="campaign-card-desc">${escHtml(c.description || '')}</div>
             <div class="campaign-card-stats">
@@ -2156,23 +2315,23 @@
               </div>
               <div class="campaign-card-stat">
                 <div class="val">${formatNumber(c.total_clicks)}</div>
-                <div class="lbl">Clicks</div>
+                <div class="lbl">Clicks totales</div>
+              </div>
+              <div class="campaign-card-stat">
+                <div class="val" style="color:var(--success)">${formatNumber(c.clicks_today || 0)}</div>
+                <div class="lbl">Hoy</div>
               </div>
             </div>
+            ${goalHtml}
           </div>
           <div class="campaign-card-footer">
             <span>${formatDate(c.created_at)}</span>
             <span class="open-hint">Abrir →</span>
           </div>
-        </div>`).join('');
-
-      // Card "+ Nueva campaña"
-      html += `
-        <div class="campaign-card-add" onclick="openCreateCampaignModal()">
-          <span class="add-icon">&#43;</span>
-          <span>Nueva campaña</span>
         </div>`;
+      }).join('');
 
+      html += `<div class="campaign-card-add" onclick="openCreateCampaignModal()"><span class="add-icon">&#43;</span><span>Nueva campaña</span></div>`;
       grid.innerHTML = html;
     }
 
@@ -2217,49 +2376,99 @@
 
     // ── Analytics inline de campaña ───────────────────────────
 
+    function setCampaignPeriod(period) {
+      state.campaignPeriod = period;
+      // Actualizar tabs activos
+      const labels = { 7: '7d', 30: '30d', 90: '90d', all: 'Todo' };
+      document.querySelectorAll('.period-tab').forEach((btn, i) => {
+        const vals = [7, 30, 90, 'all'];
+        btn.classList.toggle('active', vals[i] === period);
+      });
+      if (state.currentCampaign) {
+        if (state.cdChart) { state.cdChart.destroy(); state.cdChart = null; }
+        loadCampaignAnalytics(state.currentCampaign.id);
+      }
+    }
+
     async function loadCampaignAnalytics(id) {
       try {
-        const data = await apiFetch(`/api/analytics/campaign/${id}`);
+        const period = state.campaignPeriod;
+        const data = await apiFetch(`/api/analytics/campaign/${id}?period=${period}`);
         const c = data.campaign;
+
+        // Stat cards con badge de cambio
+        const changeBadge = (pct) => {
+          if (pct === null || pct === undefined) return '';
+          const cls = pct > 0 ? 'change-up' : pct < 0 ? 'change-down' : 'change-flat';
+          const arrow = pct > 0 ? '▲' : pct < 0 ? '▼' : '→';
+          return `<span class="change-badge ${cls}">${arrow} ${Math.abs(pct)}%</span>`;
+        };
 
         document.getElementById('cd-total-links').textContent  = formatNumber(data.total_links);
         document.getElementById('cd-active-links').textContent = formatNumber(data.active_links);
-        document.getElementById('cd-total-clicks').textContent = formatNumber(data.total_clicks);
+        document.getElementById('cd-total-clicks').innerHTML   = formatNumber(data.total_clicks) + changeBadge(data.pct_change);
         document.getElementById('cd-clicks-today').textContent = formatNumber(data.clicks_today);
 
-        const total = data.clicks_by_day.reduce((s, d) => s + d.clicks, 0);
-        document.getElementById('cd-chart-info').textContent =
-          total > 0 ? `${formatNumber(total)} clicks en 30 días` : 'Sin clicks aún';
+        // Etiqueta de período
+        const periodLabel = period === 'all' ? 'Todo el tiempo'
+          : `Últimos ${period} días${data.prev_clicks !== null ? ` · anterior: ${formatNumber(data.prev_clicks)} clicks` : ''}`;
+        document.getElementById('cd-period-label').textContent = periodLabel;
 
-        // Gráfica inline 30 días
+        // Goal progress
+        if (c.goal_clicks) {
+          const pct = Math.min(100, Math.round(data.total_clicks / c.goal_clicks * 100));
+          document.getElementById('cd-goal-text').textContent = `${formatNumber(data.total_clicks)} / ${formatNumber(c.goal_clicks)} clicks (${pct}%)`;
+          document.getElementById('cd-goal-fill').style.width = pct + '%';
+          document.getElementById('cd-goal-wrap').style.display = 'block';
+        } else {
+          document.getElementById('cd-goal-wrap').style.display = 'none';
+        }
+
+        // Insights
+        renderInsights(data.insights, c.color);
+
+        // Top links
+        renderTopLinks(data.top_links);
+
+        // Gráfica
         const ctx = document.getElementById('cd-chart').getContext('2d');
-        const labels = data.clicks_by_day.map(d => {
-          return new Date(d.day + 'T12:00:00').toLocaleDateString('es-MX', { month: 'short', day: 'numeric' });
-        });
+        const labels = data.clicks_by_day.map(d =>
+          new Date(d.day + 'T12:00:00').toLocaleDateString('es-MX', { month: 'short', day: 'numeric' })
+        );
         const values = data.clicks_by_day.map(d => d.clicks);
-        const gradient = ctx.createLinearGradient(0, 0, 0, 130);
-        gradient.addColorStop(0, c.color + 'cc');
-        gradient.addColorStop(1, c.color + '22');
 
-        state.cdChart = new Chart(ctx, {
-          type: 'bar',
-          data: { labels, datasets: [{ data: values, backgroundColor: gradient, borderRadius: 3, borderSkipped: false }] },
-          options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                backgroundColor: '#1e1e2a', borderColor: '#2a2a3a', borderWidth: 1,
-                titleColor: '#e2e8f0', bodyColor: '#94a3b8',
-                callbacks: { label: (item) => ` ${item.raw} click${item.raw !== 1 ? 's' : ''}` }
+        const total = values.reduce((s, v) => s + v, 0);
+        document.getElementById('cd-chart-info').textContent =
+          total > 0 ? `${formatNumber(total)} clicks` : 'Sin clicks en este período';
+
+        if (state.cdChart) {
+          state.cdChart.data.labels = labels;
+          state.cdChart.data.datasets[0].data = values;
+          state.cdChart.update('none');
+        } else {
+          const gradient = ctx.createLinearGradient(0, 0, 0, 130);
+          gradient.addColorStop(0, c.color + 'cc');
+          gradient.addColorStop(1, c.color + '22');
+          state.cdChart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels, datasets: [{ data: values, backgroundColor: gradient, borderRadius: 3, borderSkipped: false }] },
+            options: {
+              responsive: true, maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  backgroundColor: '#1e1e2a', borderColor: '#2a2a3a', borderWidth: 1,
+                  titleColor: '#e2e8f0', bodyColor: '#94a3b8',
+                  callbacks: { label: (item) => ` ${item.raw} click${item.raw !== 1 ? 's' : ''}` }
+                }
+              },
+              scales: {
+                x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 9 }, maxTicksLimit: 12 } },
+                y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', precision: 0 }, beginAtZero: true }
               }
-            },
-            scales: {
-              x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 9 }, maxTicksLimit: 10 } },
-              y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', precision: 0 }, beginAtZero: true }
             }
-          }
-        });
+          });
+        }
 
         // Breakdowns
         if (data.total_clicks > 0) {
@@ -2276,12 +2485,54 @@
       }
     }
 
+    function renderInsights(ins, color) {
+      const el = document.getElementById('cd-insights');
+      if (!ins || !Object.values(ins).some(v => v)) { el.style.display = 'none'; return; }
+
+      const cards = [];
+      if (ins.best_hour)    cards.push(`<div class="insight-card"><div class="ins-label">⏰ Hora pico</div><div class="ins-value">${ins.best_hour.label}</div><div class="ins-sub">${formatNumber(ins.best_hour.clicks)} clicks</div></div>`);
+      if (ins.best_dow)     cards.push(`<div class="insight-card"><div class="ins-label">📅 Día pico</div><div class="ins-value">${ins.best_dow.label}</div><div class="ins-sub">${formatNumber(ins.best_dow.clicks)} clicks</div></div>`);
+      if (ins.top_referrer) cards.push(`<div class="insight-card"><div class="ins-label">🔗 Top referrer</div><div class="ins-value" style="font-size:.78rem;word-break:break-all">${escHtml(ins.top_referrer.referrer.length > 30 ? ins.top_referrer.referrer.slice(0,30)+'…' : ins.top_referrer.referrer)}</div><div class="ins-sub">${formatNumber(ins.top_referrer.clicks)} clicks</div></div>`);
+      if (ins.top_country)  cards.push(`<div class="insight-card"><div class="ins-label">🌍 Top país</div><div class="ins-value">${countryFlag(ins.top_country.country_code)} ${escHtml(ins.top_country.country)}</div><div class="ins-sub">${formatNumber(ins.top_country.clicks)} clicks</div></div>`);
+
+      el.innerHTML = cards.join('');
+      el.style.display = cards.length ? 'grid' : 'none';
+    }
+
+    function renderTopLinks(links) {
+      const panel = document.getElementById('cd-top-links-panel');
+      const list  = document.getElementById('cd-top-links-list');
+      const info  = document.getElementById('cd-top-links-info');
+      if (!links || links.length === 0) { panel.style.display = 'none'; return; }
+
+      const maxClicks = Math.max(...links.map(l => l.clicks), 1);
+      const totalClicks = links.reduce((s, l) => s + l.clicks, 0);
+      info.textContent = `${formatNumber(totalClicks)} clicks · ${links.length} links`;
+
+      list.innerHTML = links.map((l, i) => `
+        <div class="top-link-row">
+          <span class="top-link-rank">#${i+1}</span>
+          <span class="top-link-code">/${escHtml(l.code)}</span>
+          <span class="top-link-url" title="${escHtml(l.original_url)}">${escHtml(l.original_url)}</span>
+          <div class="top-link-right">
+            <div class="top-link-bar-wrap"><div class="top-link-bar" style="width:${l.clicks/maxClicks*100}%"></div></div>
+            <span class="top-link-clicks">${formatNumber(l.clicks)}</span>
+            <span class="top-link-pct">${l.pct}%</span>
+            <button class="btn-icon" onclick="copyToClipboard('${escHtml(l.short_url)}',this)" title="Copiar URL corta" style="font-size:.8rem">&#128203;</button>
+          </div>
+        </div>`).join('');
+
+      panel.style.display = 'block';
+    }
+
     // ── Crear campaña ──────────────────────────────────────────
 
     function openCreateCampaignModal() {
       document.getElementById('camp-name').value = '';
       document.getElementById('camp-desc').value = '';
       document.getElementById('camp-color').value = CAMPAIGN_COLORS[0];
+      document.getElementById('camp-status').value = 'active';
+      document.getElementById('camp-goal').value = '';
 
       const swatches = document.getElementById('color-swatches');
       swatches.innerHTML = CAMPAIGN_COLORS.map((c, i) => `
@@ -2297,6 +2548,8 @@
       document.getElementById('camp-name').value = campaign.name;
       document.getElementById('camp-desc').value = campaign.description || '';
       document.getElementById('camp-color').value = campaign.color;
+      document.getElementById('camp-status').value = campaign.status || 'active';
+      document.getElementById('camp-goal').value = campaign.goal_clicks || '';
 
       const swatches = document.getElementById('color-swatches');
       swatches.innerHTML = CAMPAIGN_COLORS.map(c => `
@@ -2338,10 +2591,13 @@
     document.getElementById('create-campaign-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn    = document.getElementById('create-campaign-btn');
-      const name   = document.getElementById('camp-name').value.trim();
-      const desc   = document.getElementById('camp-desc').value.trim();
-      const color  = document.getElementById('camp-color').value;
-      const editId = e.target.dataset.editId;
+      const name     = document.getElementById('camp-name').value.trim();
+      const desc     = document.getElementById('camp-desc').value.trim();
+      const color    = document.getElementById('camp-color').value;
+      const status   = document.getElementById('camp-status').value;
+      const goalRaw  = document.getElementById('camp-goal').value;
+      const goal_clicks = goalRaw && Number(goalRaw) > 0 ? Number(goalRaw) : null;
+      const editId   = e.target.dataset.editId;
 
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span>';
@@ -2349,13 +2605,13 @@
         if (editId) {
           await apiFetch(`/api/campaigns/${editId}`, {
             method: 'PATCH',
-            body: JSON.stringify({ name, description: desc || null, color })
+            body: JSON.stringify({ name, description: desc || null, color, status, goal_clicks })
           });
           toast(`Campaña actualizada`, 'success');
         } else {
           await apiFetch('/api/campaigns', {
             method: 'POST',
-            body: JSON.stringify({ name, description: desc || undefined, color })
+            body: JSON.stringify({ name, description: desc || undefined, color, status, goal_clicks })
           });
           toast(`Campaña "${name}" creada`, 'success');
         }

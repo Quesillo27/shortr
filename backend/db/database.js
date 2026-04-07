@@ -61,6 +61,11 @@ db.exec(`
   );
 `);
 
+// Migración campaigns: agregar status y goal_clicks si no existen
+const campCols = db.prepare('PRAGMA table_info(campaigns)').all().map(c => c.name);
+if (!campCols.includes('status'))      db.exec("ALTER TABLE campaigns ADD COLUMN status TEXT DEFAULT 'active'");
+if (!campCols.includes('goal_clicks')) db.exec('ALTER TABLE campaigns ADD COLUMN goal_clicks INTEGER');
+
 // Migración links: agregar campaign_id si no existe
 const linkCols = db.prepare('PRAGMA table_info(links)').all().map(c => c.name);
 if (!linkCols.includes('campaign_id')) {

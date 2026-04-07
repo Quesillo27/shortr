@@ -212,97 +212,164 @@ router.get('/:code', verifyToken, (req, res) => {
 });
 
 /**
- * GET /api/analytics/campaign/:id
- * Dashboard completo de una campaña:
- * stats agregadas, top links, clicks por día, desglose dispositivo/país/navegador/OS
+ * GET /api/analytics/campaign/:id?period=7|30|90|all
+ * Dashboard completo de una campaña con período dinámico, comparación vs período anterior e insights.
  */
 router.get('/campaign/:id', verifyToken, (req, res) => {
   const { id } = req.params;
   if (!id || isNaN(Number(id))) return res.status(400).json({ error: 'ID inválido' });
 
+  const rawPeriod = req.query.period;
+  const period    = ['7','30','90'].includes(rawPeriod) ? Number(rawPeriod) : (rawPeriod === 'all' ? null : 30);
+
   try {
     const campaign = db.prepare('SELECT * FROM campaigns WHERE id = ?').get(Number(id));
     if (!campaign) return res.status(404).json({ error: 'Campaña no encontrada' });
 
-    // Stats generales
+    const periodClause     = period ? `AND ck.clicked_at >= datetime('now', '-${period} days')` : '';
+    const prevPeriodClause = period
+      ? `AND ck.clicked_at >= datetime('now', '-${period * 2} days') AND ck.clicked_at < datetime('now', '-${period} days')`
+      : '';
+
+    // Stats del período actual
     const stats = db.prepare(`
       SELECT
-        COUNT(DISTINCT l.id)                                          AS total_links,
-        COUNT(DISTINCT CASE WHEN l.is_active = 1 AND (l.expires_at IS NULL OR l.expires_at > datetime('now')) THEN l.id END) AS active_links,
-        COUNT(ck.id)                                                  AS total_clicks,
+        COUNT(DISTINCT l.id) AS total_links,
+        COUNT(DISTINCT CASE WHEN l.is_active=1 AND (l.expires_at IS NULL OR l.expires_at > datetime('now')) THEN l.id END) AS active_links,
+        COUNT(ck.id)         AS total_clicks,
         COUNT(CASE WHEN date(ck.clicked_at) = date('now') THEN 1 END) AS clicks_today
       FROM links l
       LEFT JOIN clicks ck ON ck.link_id = l.id
-      WHERE l.campaign_id = ?
+      WHERE l.campaign_id = ? ${periodClause}
     `).get(Number(id));
 
-    // Clicks por día — últimos 30 días
+    // Stats período anterior (para comparar)
+    const prevStats = period ? db.prepare(`
+      SELECT COUNT(ck.id) AS total_clicks
+      FROM clicks ck JOIN links l ON ck.link_id = l.id
+      WHERE l.campaign_id = ? ${prevPeriodClause}
+    `).get(Number(id)) : null;
+
+    // % de cambio vs período anterior
+    const prev_clicks = prevStats ? prevStats.total_clicks : null;
+    const pct_change  = (prev_clicks !== null && prev_clicks > 0)
+      ? Math.round((stats.total_clicks - prev_clicks) / prev_clicks * 100)
+      : (prev_clicks === 0 && stats.total_clicks > 0 ? 100 : null);
+
+    // Clicks por día del período
+    const days = period || 30;
     const rawDays = db.prepare(`
       SELECT date(ck.clicked_at) AS day, COUNT(*) AS clicks
-      FROM clicks ck
-      JOIN links l ON ck.link_id = l.id
-      WHERE l.campaign_id = ?
-        AND ck.clicked_at >= datetime('now', '-30 days')
-      GROUP BY date(ck.clicked_at)
-      ORDER BY day ASC
+      FROM clicks ck JOIN links l ON ck.link_id = l.id
+      WHERE l.campaign_id = ? ${periodClause}
+      GROUP BY date(ck.clicked_at) ORDER BY day ASC
     `).all(Number(id));
 
     const clickMap = {};
     rawDays.forEach(r => { clickMap[r.day] = r.clicks; });
     const today = new Date();
     const clicks_by_day = [];
-    for (let i = 29; i >= 0; i--) {
+    for (let i = days - 1; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
       const dayStr = d.toISOString().split('T')[0];
       clicks_by_day.push({ day: dayStr, clicks: clickMap[dayStr] || 0 });
     }
 
-    // Top 5 links de la campaña
+    // Top links con % del total del período
     const topLinks = db.prepare(`
       SELECT l.code, l.original_url, l.is_active, COUNT(ck.id) AS clicks
       FROM links l
-      LEFT JOIN clicks ck ON ck.link_id = l.id
+      LEFT JOIN clicks ck ON ck.link_id = l.id ${periodClause ? `AND ck.clicked_at >= datetime('now', '-${period} days')` : ''}
       WHERE l.campaign_id = ?
-      GROUP BY l.id
-      ORDER BY clicks DESC
-      LIMIT 5
+      GROUP BY l.id ORDER BY clicks DESC LIMIT 8
     `).all(Number(id));
 
     const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
-    topLinks.forEach(l => { l.short_url = `${baseUrl}/${l.code}`; });
+    const totalForPct = topLinks.reduce((s, l) => s + l.clicks, 0) || 1;
+    topLinks.forEach(l => {
+      l.short_url = `${baseUrl}/${l.code}`;
+      l.pct = Math.round(l.clicks / totalForPct * 100);
+    });
+
+    // ── Insights automáticos ───────────────────────────────────
+    const DOW_NAMES = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+
+    const bestHourRow = db.prepare(`
+      SELECT CAST(strftime('%H', ck.clicked_at) AS INTEGER) AS hour, COUNT(*) AS cnt
+      FROM clicks ck JOIN links l ON ck.link_id = l.id
+      WHERE l.campaign_id = ? ${periodClause}
+      GROUP BY hour ORDER BY cnt DESC LIMIT 1
+    `).get(Number(id));
+
+    const bestDowRow = db.prepare(`
+      SELECT CAST(strftime('%w', ck.clicked_at) AS INTEGER) AS dow, COUNT(*) AS cnt
+      FROM clicks ck JOIN links l ON ck.link_id = l.id
+      WHERE l.campaign_id = ? ${periodClause}
+      GROUP BY dow ORDER BY cnt DESC LIMIT 1
+    `).get(Number(id));
+
+    const topReferrerRow = db.prepare(`
+      SELECT COALESCE(ck.referrer, 'Directo') AS referrer, COUNT(*) AS cnt
+      FROM clicks ck JOIN links l ON ck.link_id = l.id
+      WHERE l.campaign_id = ? ${periodClause}
+      GROUP BY ck.referrer ORDER BY cnt DESC LIMIT 1
+    `).get(Number(id));
+
+    const topCountryRow = db.prepare(`
+      SELECT COALESCE(ck.country, 'Desconocido') AS country,
+             COALESCE(ck.country_code, '??') AS country_code, COUNT(*) AS cnt
+      FROM clicks ck JOIN links l ON ck.link_id = l.id
+      WHERE l.campaign_id = ? ${periodClause}
+      GROUP BY ck.country ORDER BY cnt DESC LIMIT 1
+    `).get(Number(id));
+
+    // Hora formateada
+    const formatHour = h => h === null ? null
+      : h === 0 ? '12am' : h < 12 ? `${h}am` : h === 12 ? '12pm' : `${h - 12}pm`;
+
+    const insights = {
+      best_hour:    bestHourRow   ? { hour: bestHourRow.hour, label: formatHour(bestHourRow.hour), clicks: bestHourRow.cnt } : null,
+      best_dow:     bestDowRow    ? { dow: bestDowRow.dow, label: DOW_NAMES[bestDowRow.dow], clicks: bestDowRow.cnt } : null,
+      top_referrer: topReferrerRow? { referrer: topReferrerRow.referrer, clicks: topReferrerRow.cnt } : null,
+      top_country:  topCountryRow ? { country: topCountryRow.country, country_code: topCountryRow.country_code, clicks: topCountryRow.cnt } : null,
+    };
 
     // Desgloses
     const deviceBreakdown = db.prepare(`
-      SELECT COALESCE(ck.device_type, 'desktop') AS device, COUNT(*) AS count
+      SELECT COALESCE(ck.device_type,'desktop') AS device, COUNT(*) AS count
       FROM clicks ck JOIN links l ON ck.link_id = l.id
-      WHERE l.campaign_id = ? GROUP BY ck.device_type ORDER BY count DESC
+      WHERE l.campaign_id = ? ${periodClause} GROUP BY ck.device_type ORDER BY count DESC
     `).all(Number(id));
 
     const browserBreakdown = db.prepare(`
-      SELECT COALESCE(ck.browser, 'Desconocido') AS browser, COUNT(*) AS count
+      SELECT COALESCE(ck.browser,'Desconocido') AS browser, COUNT(*) AS count
       FROM clicks ck JOIN links l ON ck.link_id = l.id
-      WHERE l.campaign_id = ? GROUP BY ck.browser ORDER BY count DESC LIMIT 5
+      WHERE l.campaign_id = ? ${periodClause} GROUP BY ck.browser ORDER BY count DESC LIMIT 5
     `).all(Number(id));
 
     const osBreakdown = db.prepare(`
-      SELECT COALESCE(ck.os, 'Desconocido') AS os, COUNT(*) AS count
+      SELECT COALESCE(ck.os,'Desconocido') AS os, COUNT(*) AS count
       FROM clicks ck JOIN links l ON ck.link_id = l.id
-      WHERE l.campaign_id = ? GROUP BY ck.os ORDER BY count DESC LIMIT 5
+      WHERE l.campaign_id = ? ${periodClause} GROUP BY ck.os ORDER BY count DESC LIMIT 5
     `).all(Number(id));
 
     const countryBreakdown = db.prepare(`
       SELECT COALESCE(ck.country_code,'??') AS country_code,
              COALESCE(ck.country,'Desconocido') AS country, COUNT(*) AS count
       FROM clicks ck JOIN links l ON ck.link_id = l.id
-      WHERE l.campaign_id = ? GROUP BY ck.country_code ORDER BY count DESC LIMIT 8
+      WHERE l.campaign_id = ? ${periodClause} GROUP BY ck.country_code ORDER BY count DESC LIMIT 8
     `).all(Number(id));
 
     res.json({
       campaign,
       ...stats,
+      prev_clicks,
+      pct_change,
+      period: period || 'all',
       clicks_by_day,
       top_links: topLinks,
+      insights,
       device_breakdown: deviceBreakdown,
       browser_breakdown: browserBreakdown,
       os_breakdown: osBreakdown,
