@@ -211,4 +211,107 @@ router.get('/:code', verifyToken, (req, res) => {
   }
 });
 
+/**
+ * GET /api/analytics/campaign/:id
+ * Dashboard completo de una campaña:
+ * stats agregadas, top links, clicks por día, desglose dispositivo/país/navegador/OS
+ */
+router.get('/campaign/:id', verifyToken, (req, res) => {
+  const { id } = req.params;
+  if (!id || isNaN(Number(id))) return res.status(400).json({ error: 'ID inválido' });
+
+  try {
+    const campaign = db.prepare('SELECT * FROM campaigns WHERE id = ?').get(Number(id));
+    if (!campaign) return res.status(404).json({ error: 'Campaña no encontrada' });
+
+    // Stats generales
+    const stats = db.prepare(`
+      SELECT
+        COUNT(DISTINCT l.id)                                          AS total_links,
+        COUNT(DISTINCT CASE WHEN l.is_active = 1 AND (l.expires_at IS NULL OR l.expires_at > datetime('now')) THEN l.id END) AS active_links,
+        COUNT(ck.id)                                                  AS total_clicks,
+        COUNT(CASE WHEN date(ck.clicked_at) = date('now') THEN 1 END) AS clicks_today
+      FROM links l
+      LEFT JOIN clicks ck ON ck.link_id = l.id
+      WHERE l.campaign_id = ?
+    `).get(Number(id));
+
+    // Clicks por día — últimos 30 días
+    const rawDays = db.prepare(`
+      SELECT date(ck.clicked_at) AS day, COUNT(*) AS clicks
+      FROM clicks ck
+      JOIN links l ON ck.link_id = l.id
+      WHERE l.campaign_id = ?
+        AND ck.clicked_at >= datetime('now', '-30 days')
+      GROUP BY date(ck.clicked_at)
+      ORDER BY day ASC
+    `).all(Number(id));
+
+    const clickMap = {};
+    rawDays.forEach(r => { clickMap[r.day] = r.clicks; });
+    const today = new Date();
+    const clicks_by_day = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const dayStr = d.toISOString().split('T')[0];
+      clicks_by_day.push({ day: dayStr, clicks: clickMap[dayStr] || 0 });
+    }
+
+    // Top 5 links de la campaña
+    const topLinks = db.prepare(`
+      SELECT l.code, l.original_url, l.is_active, COUNT(ck.id) AS clicks
+      FROM links l
+      LEFT JOIN clicks ck ON ck.link_id = l.id
+      WHERE l.campaign_id = ?
+      GROUP BY l.id
+      ORDER BY clicks DESC
+      LIMIT 5
+    `).all(Number(id));
+
+    const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+    topLinks.forEach(l => { l.short_url = `${baseUrl}/${l.code}`; });
+
+    // Desgloses
+    const deviceBreakdown = db.prepare(`
+      SELECT COALESCE(ck.device_type, 'desktop') AS device, COUNT(*) AS count
+      FROM clicks ck JOIN links l ON ck.link_id = l.id
+      WHERE l.campaign_id = ? GROUP BY ck.device_type ORDER BY count DESC
+    `).all(Number(id));
+
+    const browserBreakdown = db.prepare(`
+      SELECT COALESCE(ck.browser, 'Desconocido') AS browser, COUNT(*) AS count
+      FROM clicks ck JOIN links l ON ck.link_id = l.id
+      WHERE l.campaign_id = ? GROUP BY ck.browser ORDER BY count DESC LIMIT 5
+    `).all(Number(id));
+
+    const osBreakdown = db.prepare(`
+      SELECT COALESCE(ck.os, 'Desconocido') AS os, COUNT(*) AS count
+      FROM clicks ck JOIN links l ON ck.link_id = l.id
+      WHERE l.campaign_id = ? GROUP BY ck.os ORDER BY count DESC LIMIT 5
+    `).all(Number(id));
+
+    const countryBreakdown = db.prepare(`
+      SELECT COALESCE(ck.country_code,'??') AS country_code,
+             COALESCE(ck.country,'Desconocido') AS country, COUNT(*) AS count
+      FROM clicks ck JOIN links l ON ck.link_id = l.id
+      WHERE l.campaign_id = ? GROUP BY ck.country_code ORDER BY count DESC LIMIT 8
+    `).all(Number(id));
+
+    res.json({
+      campaign,
+      ...stats,
+      clicks_by_day,
+      top_links: topLinks,
+      device_breakdown: deviceBreakdown,
+      browser_breakdown: browserBreakdown,
+      os_breakdown: osBreakdown,
+      country_breakdown: countryBreakdown
+    });
+  } catch (err) {
+    console.error('Error en analytics de campaña:', err.message);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 module.exports = router;

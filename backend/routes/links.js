@@ -43,7 +43,7 @@ function isValidAlias(alias) {
  * Body: { url, alias?, expiresAt? }
  */
 router.post('/', verifyToken, (req, res) => {
-  const { url, alias, expiresAt } = req.body;
+  const { url, alias, expiresAt, campaignId } = req.body;
 
   // Validaciones
   if (!url) {
@@ -99,13 +99,21 @@ router.post('/', verifyToken, (req, res) => {
     }
   }
 
+  // Validar campaignId si fue enviado
+  let validCampaignId = null;
+  if (campaignId) {
+    const camp = db.prepare('SELECT id FROM campaigns WHERE id = ?').get(Number(campaignId));
+    if (!camp) return res.status(400).json({ error: 'La campaña especificada no existe' });
+    validCampaignId = Number(campaignId);
+  }
+
   try {
     const stmt = db.prepare(`
-      INSERT INTO links (code, original_url, expires_at)
-      VALUES (?, ?, ?)
+      INSERT INTO links (code, original_url, expires_at, campaign_id)
+      VALUES (?, ?, ?, ?)
     `);
 
-    const result = stmt.run(code, url, expiresAtDate ? expiresAtDate.toISOString() : null);
+    const result = stmt.run(code, url, expiresAtDate ? expiresAtDate.toISOString() : null, validCampaignId);
     const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
 
     res.status(201).json({
@@ -114,6 +122,7 @@ router.post('/', verifyToken, (req, res) => {
       original_url: url,
       short_url: `${baseUrl}/${code}`,
       expires_at: expiresAtDate ? expiresAtDate.toISOString() : null,
+      campaign_id: validCampaignId,
       created_at: new Date().toISOString()
     });
   } catch (err) {
@@ -127,58 +136,53 @@ router.post('/', verifyToken, (req, res) => {
 
 /**
  * GET /api/links
- * Lista links con paginación y búsqueda.
- * Query params: page (default 1), limit (default 20, max 100), search (filtra por code o URL)
+ * Lista links con paginación, búsqueda y filtro por campaña.
+ * Query params: page, limit, search, campaign_id (número o "none" para sin campaña)
  */
 router.get('/', verifyToken, (req, res) => {
-  const page = Math.max(1, parseInt(req.query.page) || 1);
-  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+  const page   = Math.max(1, parseInt(req.query.page) || 1);
+  const limit  = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
   const offset = (page - 1) * limit;
   const search = req.query.search ? req.query.search.trim() : null;
+  const campaignFilter = req.query.campaign_id; // número, "none" o undefined
 
   try {
     const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
 
+    // Construir cláusulas WHERE dinámicamente
+    const conditions = [];
+    const params = [];
+
     if (search) {
-      const pattern = `%${search}%`;
-      const total = db.prepare(
-        'SELECT COUNT(*) AS count FROM links WHERE code LIKE ? OR original_url LIKE ?'
-      ).get(pattern, pattern);
-
-      const links = db.prepare(`
-        SELECT l.id, l.code, l.original_url, l.created_at, l.expires_at, l.is_active,
-          COUNT(c.id) AS click_count
-        FROM links l
-        LEFT JOIN clicks c ON c.link_id = l.id
-        WHERE l.code LIKE ? OR l.original_url LIKE ?
-        GROUP BY l.id
-        ORDER BY l.created_at DESC
-        LIMIT ? OFFSET ?
-      `).all(pattern, pattern, limit, offset);
-
-      const enriched = links.map(link => ({
-        ...link,
-        short_url: `${baseUrl}/${link.code}`,
-        is_expired: link.expires_at ? new Date(link.expires_at) < new Date() : false
-      }));
-
-      return res.json({
-        links: enriched,
-        pagination: { total: total.count, page, limit, pages: Math.ceil(total.count / limit) }
-      });
+      conditions.push('(l.code LIKE ? OR l.original_url LIKE ?)');
+      params.push(`%${search}%`, `%${search}%`);
+    }
+    if (campaignFilter === 'none') {
+      conditions.push('l.campaign_id IS NULL');
+    } else if (campaignFilter) {
+      conditions.push('l.campaign_id = ?');
+      params.push(Number(campaignFilter));
     }
 
-    const total = db.prepare('SELECT COUNT(*) AS count FROM links').get();
+    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+
+    const total = db.prepare(`SELECT COUNT(*) AS count FROM links l ${where}`).get(...params);
 
     const links = db.prepare(`
-      SELECT l.id, l.code, l.original_url, l.created_at, l.expires_at, l.is_active,
-        COUNT(c.id) AS click_count
+      SELECT
+        l.id, l.code, l.original_url, l.created_at, l.expires_at,
+        l.is_active, l.campaign_id,
+        c2.name  AS campaign_name,
+        c2.color AS campaign_color,
+        COUNT(ck.id) AS click_count
       FROM links l
-      LEFT JOIN clicks c ON c.link_id = l.id
+      LEFT JOIN clicks    ck ON ck.link_id = l.id
+      LEFT JOIN campaigns c2 ON c2.id = l.campaign_id
+      ${where}
       GROUP BY l.id
       ORDER BY l.created_at DESC
       LIMIT ? OFFSET ?
-    `).all(limit, offset);
+    `).all(...params, limit, offset);
 
     const enriched = links.map(link => ({
       ...link,

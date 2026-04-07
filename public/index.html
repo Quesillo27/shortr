@@ -818,6 +818,145 @@
       .nav-user span { display: none; }
     }
 
+    /* ===== Campañas ===== */
+    .campaign-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      scrollbar-width: thin;
+      flex-wrap: nowrap;
+    }
+    .campaign-bar::-webkit-scrollbar { height: 3px; }
+    .campaign-bar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .campaign-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      white-space: nowrap;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg3);
+      color: var(--text2);
+      transition: all var(--transition);
+      user-select: none;
+    }
+    .campaign-pill:hover { border-color: var(--accent); color: var(--text); }
+    .campaign-pill.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 2px 8px var(--accent-glow);
+    }
+    .campaign-pill .pill-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .campaign-pill .pill-count {
+      font-size: 0.7rem;
+      opacity: 0.75;
+    }
+    .campaign-pill-add {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.3rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      border: 1px dashed var(--border);
+      background: transparent;
+      color: var(--text3);
+      white-space: nowrap;
+      transition: all var(--transition);
+    }
+    .campaign-pill-add:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Campaña badge en tabla */
+    .campaign-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 500;
+      margin-top: 0.2rem;
+    }
+    .campaign-badge .badge-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Modal de campaña */
+    .campaign-modal-header-color {
+      height: 4px;
+      border-radius: var(--radius) var(--radius) 0 0;
+      margin: -1.5rem -1.5rem 1rem;
+    }
+    .campaign-top-links { margin-top: 0.5rem; }
+    .campaign-top-link-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.82rem;
+    }
+    .campaign-top-link-item:last-child { border-bottom: none; }
+    .campaign-top-link-rank {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text3);
+      min-width: 18px;
+      text-align: center;
+    }
+    .campaign-top-link-code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: var(--accent2);
+      font-size: 0.8rem;
+      min-width: 80px;
+    }
+    .campaign-top-link-url {
+      flex: 1;
+      color: var(--text2);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .campaign-top-link-clicks {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
+    /* Modal crear campaña */
+    .color-swatches {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.4rem;
+    }
+    .color-swatch {
+      width: 26px; height: 26px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform var(--transition), border-color var(--transition);
+    }
+    .color-swatch:hover { transform: scale(1.15); }
+    .color-swatch.selected { border-color: #fff; transform: scale(1.1); }
+
     /* ===== Breakdown panels (modal) ===== */
     .breakdown-grid {
       display: grid;
@@ -1130,6 +1269,12 @@
               <label for="new-expires">Fecha de expiracion</label>
               <input type="datetime-local" id="new-expires" />
             </div>
+            <div class="form-group">
+              <label for="new-campaign">Campaña</label>
+              <select id="new-campaign">
+                <option value="">Sin campaña</option>
+              </select>
+            </div>
           </div>
         </form>
 
@@ -1157,6 +1302,14 @@
               &#8635; Actualizar
             </button>
           </div>
+        </div>
+
+        <!-- Barra de campañas -->
+        <div class="campaign-bar" id="campaign-bar">
+          <div class="campaign-pill active" data-id="" onclick="setActiveCampaign(null)">
+            Todas
+          </div>
+          <!-- pills dinámicos aquí -->
         </div>
 
         <div class="table-wrap">
@@ -1262,6 +1415,106 @@
     </div>
   </div>
 
+  <!-- ===== MODAL CREAR CAMPAÑA ===== -->
+  <div class="modal-overlay" id="create-campaign-modal">
+    <div class="modal" style="max-width:420px">
+      <div class="modal-header">
+        <div class="modal-title"><h3>Nueva Campaña</h3></div>
+        <button class="modal-close" id="create-campaign-close">&#215;</button>
+      </div>
+      <div class="modal-body">
+        <form id="create-campaign-form">
+          <div class="form-group">
+            <label for="camp-name">Nombre *</label>
+            <input type="text" id="camp-name" placeholder="Ej: Black Friday 2026" maxlength="60" required />
+          </div>
+          <div class="form-group">
+            <label for="camp-desc">Descripción (opcional)</label>
+            <input type="text" id="camp-desc" placeholder="Breve descripción de la campaña" maxlength="120" />
+          </div>
+          <div class="form-group">
+            <label>Color</label>
+            <div class="color-swatches" id="color-swatches"></div>
+            <input type="hidden" id="camp-color" value="#7c6af7" />
+          </div>
+          <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+            <button type="button" class="btn btn-ghost" id="create-campaign-cancel" style="flex:1">Cancelar</button>
+            <button type="submit" class="btn btn-primary" style="flex:1" id="create-campaign-btn">Crear campaña</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL DASHBOARD DE CAMPAÑA ===== -->
+  <div class="modal-overlay" id="campaign-dashboard-modal">
+    <div class="modal" style="max-width:680px">
+      <div class="modal-header">
+        <div class="modal-title">
+          <h3 id="cdash-title">Campaña</h3>
+          <p id="cdash-desc"></p>
+        </div>
+        <button class="modal-close" id="cdash-close">&#215;</button>
+      </div>
+      <div class="modal-body">
+        <div class="campaign-modal-header-color" id="cdash-color-bar"></div>
+
+        <!-- Stats de campaña -->
+        <div class="analytics-stats" style="grid-template-columns:repeat(4,1fr)">
+          <div class="analytics-stat">
+            <div class="value" id="cdash-total-links">--</div>
+            <div class="label">Links</div>
+          </div>
+          <div class="analytics-stat">
+            <div class="value" id="cdash-active-links">--</div>
+            <div class="label">Activos</div>
+          </div>
+          <div class="analytics-stat">
+            <div class="value" id="cdash-total-clicks">--</div>
+            <div class="label">Clicks Totales</div>
+          </div>
+          <div class="analytics-stat">
+            <div class="value" id="cdash-clicks-today">--</div>
+            <div class="label">Clicks Hoy</div>
+          </div>
+        </div>
+
+        <!-- Gráfica de clicks por día -->
+        <div class="chart-container" style="margin-top:1rem">
+          <canvas id="cdash-chart"></canvas>
+        </div>
+
+        <!-- Top links -->
+        <div id="cdash-top-links-section" style="margin-top:1rem;display:none">
+          <h4 style="font-size:0.75rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem">
+            Top Links
+          </h4>
+          <div id="cdash-top-links"></div>
+        </div>
+
+        <!-- Breakdowns -->
+        <div class="breakdown-grid" id="cdash-breakdown-grid" style="display:none;margin-top:0">
+          <div class="breakdown-panel">
+            <h4>&#128241; Dispositivos</h4>
+            <div id="cdash-device-list"></div>
+          </div>
+          <div class="breakdown-panel">
+            <h4>&#127760; Países</h4>
+            <div id="cdash-country-list"></div>
+          </div>
+          <div class="breakdown-panel">
+            <h4>&#127758; Navegadores</h4>
+            <div id="cdash-browser-list"></div>
+          </div>
+          <div class="breakdown-panel">
+            <h4>&#128187; Sistema Operativo</h4>
+            <div id="cdash-os-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== Toast container ===== -->
   <div class="toast-container" id="toast-container"></div>
 
@@ -1276,11 +1529,14 @@
       analyticsChart: null,
       activityChart: null,
       hourlyChart: null,
+      campaignDashChart: null,
       page: 1,
       limit: 20,
       search: '',
       totalLinks: 0,
       totalPages: 1,
+      campaigns: [],
+      activeCampaign: null, // null = Todas
     };
 
     // ═══════════════════════════════════════════════════════════
@@ -1417,7 +1673,7 @@
     // ═══════════════════════════════════════════════════════════
 
     async function loadDashboard() {
-      await Promise.all([loadStats(), loadLinks()]);
+      await Promise.all([loadStats(), loadLinks(), loadCampaigns()]);
     }
 
     async function loadStats() {
@@ -1532,6 +1788,7 @@
       try {
         const params = new URLSearchParams({ page: state.page, limit: state.limit });
         if (state.search) params.set('search', state.search);
+        if (state.activeCampaign !== null) params.set('campaign_id', state.activeCampaign === 'none' ? 'none' : state.activeCampaign);
         const data = await apiFetch(`/api/links?${params}`);
         state.links = data.links;
         if (data.pagination) {
@@ -1583,10 +1840,17 @@
           ? `<br><span class="text-xs text-muted">Expira: ${formatDate(link.expires_at)}</span>`
           : '';
 
+        const campaignBadge = link.campaign_name
+          ? `<br><span class="campaign-badge" style="background:${escHtml(link.campaign_color)}22;color:${escHtml(link.campaign_color)}">
+               <span class="badge-dot" style="background:${escHtml(link.campaign_color)}"></span>${escHtml(link.campaign_name)}
+             </span>`
+          : '';
+
         return `
           <tr>
             <td>
               <span class="link-code">${escHtml(link.code)}</span>
+              ${campaignBadge}
             </td>
             <td>
               <div class="link-original" title="${escHtml(link.original_url)}">
@@ -1657,6 +1921,7 @@
       const url = document.getElementById('new-url').value.trim();
       const alias = document.getElementById('new-alias').value.trim();
       const expiresAt = document.getElementById('new-expires').value;
+      const campaignId = document.getElementById('new-campaign').value;
 
       if (!url) return;
 
@@ -1666,6 +1931,7 @@
       const body = { url };
       if (alias) body.alias = alias;
       if (expiresAt) body.expiresAt = new Date(expiresAt).toISOString();
+      if (campaignId) body.campaignId = Number(campaignId);
 
       try {
         const data = await apiFetch('/api/links', {
@@ -1684,6 +1950,7 @@
         document.getElementById('new-url').value = '';
         document.getElementById('new-alias').value = '';
         document.getElementById('new-expires').value = '';
+        document.getElementById('new-campaign').value = '';
 
         toast(`Link creado: ${data.short_url}`, 'success');
         loadDashboard();
@@ -1698,6 +1965,237 @@
     document.getElementById('copy-result-btn').addEventListener('click', function() {
       const url = document.getElementById('result-url').textContent;
       copyToClipboard(url, this);
+    });
+
+    // ═══════════════════════════════════════════════════════════
+    // CAMPAÑAS
+    // ═══════════════════════════════════════════════════════════
+
+    const CAMPAIGN_COLORS = [
+      '#7c6af7','#3b82f6','#10b981','#f59e0b',
+      '#ef4444','#ec4899','#8b5cf6','#06b6d4','#84cc16','#f97316'
+    ];
+
+    async function loadCampaigns() {
+      try {
+        const data = await apiFetch('/api/campaigns');
+        state.campaigns = data.campaigns;
+        renderCampaignPills();
+        populateCampaignSelect();
+      } catch (err) {
+        if (err.message.includes('401') || err.message.includes('Token')) logout();
+      }
+    }
+
+    function renderCampaignPills() {
+      const bar = document.getElementById('campaign-bar');
+      const allActive = state.activeCampaign === null;
+
+      let html = `<div class="campaign-pill ${allActive ? 'active' : ''}" onclick="setActiveCampaign(null)">Todas</div>`;
+
+      state.campaigns.forEach(c => {
+        const isActive = state.activeCampaign === c.id;
+        html += `
+          <div class="campaign-pill ${isActive ? 'active' : ''}" onclick="setActiveCampaign(${c.id})" title="${escHtml(c.description || c.name)}">
+            <span class="pill-dot" style="background:${escHtml(c.color)}"></span>
+            ${escHtml(c.name)}
+            <span class="pill-count">${c.link_count}</span>
+            <button onclick="event.stopPropagation();openCampaignDashboard(${c.id})" style="background:none;border:none;cursor:pointer;padding:0;color:inherit;opacity:.7;font-size:.85rem" title="Ver dashboard">&#128200;</button>
+            <button onclick="event.stopPropagation();deleteCampaign(${c.id},'${escHtml(c.name)}')" style="background:none;border:none;cursor:pointer;padding:0;color:var(--danger);opacity:.6;font-size:.8rem" title="Eliminar campaña">&#215;</button>
+          </div>`;
+      });
+
+      html += `<button class="campaign-pill-add" onclick="openCreateCampaignModal()">&#43; Campaña</button>`;
+      bar.innerHTML = html;
+    }
+
+    function populateCampaignSelect() {
+      const sel = document.getElementById('new-campaign');
+      sel.innerHTML = '<option value="">Sin campaña</option>';
+      state.campaigns.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.name;
+        sel.appendChild(opt);
+      });
+    }
+
+    function setActiveCampaign(id) {
+      state.activeCampaign = id;
+      state.page = 1;
+      renderCampaignPills();
+      loadLinks();
+    }
+
+    // ── Crear campaña ──────────────────────────────────────────
+
+    function openCreateCampaignModal() {
+      document.getElementById('camp-name').value = '';
+      document.getElementById('camp-desc').value = '';
+      document.getElementById('camp-color').value = CAMPAIGN_COLORS[0];
+
+      const swatches = document.getElementById('color-swatches');
+      swatches.innerHTML = CAMPAIGN_COLORS.map((c, i) => `
+        <div class="color-swatch ${i === 0 ? 'selected' : ''}"
+          style="background:${c}"
+          onclick="selectCampColor('${c}', this)"
+          title="${c}">
+        </div>`).join('');
+
+      document.getElementById('create-campaign-modal').classList.add('active');
+      setTimeout(() => document.getElementById('camp-name').focus(), 50);
+    }
+
+    function selectCampColor(color, el) {
+      document.getElementById('camp-color').value = color;
+      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    document.getElementById('create-campaign-close').addEventListener('click', () =>
+      document.getElementById('create-campaign-modal').classList.remove('active'));
+    document.getElementById('create-campaign-cancel').addEventListener('click', () =>
+      document.getElementById('create-campaign-modal').classList.remove('active'));
+
+    document.getElementById('create-campaign-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('create-campaign-btn');
+      const name  = document.getElementById('camp-name').value.trim();
+      const desc  = document.getElementById('camp-desc').value.trim();
+      const color = document.getElementById('camp-color').value;
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>';
+      try {
+        await apiFetch('/api/campaigns', {
+          method: 'POST',
+          body: JSON.stringify({ name, description: desc || undefined, color })
+        });
+        document.getElementById('create-campaign-modal').classList.remove('active');
+        toast(`Campaña "${name}" creada`, 'success');
+        await loadCampaigns();
+      } catch (err) {
+        toast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Crear campaña';
+      }
+    });
+
+    async function deleteCampaign(id, name) {
+      if (!confirm(`¿Eliminar la campaña "${name}"?\nLos links quedarán sin campaña.`)) return;
+      try {
+        await apiFetch(`/api/campaigns/${id}`, { method: 'DELETE' });
+        toast(`Campaña "${name}" eliminada`, 'success');
+        if (state.activeCampaign === id) state.activeCampaign = null;
+        await Promise.all([loadCampaigns(), loadLinks()]);
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    }
+
+    // ── Dashboard de campaña ───────────────────────────────────
+
+    async function openCampaignDashboard(id) {
+      const modal = document.getElementById('campaign-dashboard-modal');
+      modal.classList.add('active');
+
+      document.getElementById('cdash-title').textContent = 'Cargando...';
+      document.getElementById('cdash-desc').textContent = '';
+      ['cdash-total-links','cdash-active-links','cdash-total-clicks','cdash-clicks-today']
+        .forEach(el => document.getElementById(el).textContent = '--');
+      document.getElementById('cdash-top-links-section').style.display = 'none';
+      document.getElementById('cdash-breakdown-grid').style.display = 'none';
+
+      if (state.campaignDashChart) { state.campaignDashChart.destroy(); state.campaignDashChart = null; }
+
+      try {
+        const data = await apiFetch(`/api/analytics/campaign/${id}`);
+        const c = data.campaign;
+
+        document.getElementById('cdash-color-bar').style.background = c.color;
+        document.getElementById('cdash-title').textContent = c.name;
+        document.getElementById('cdash-desc').textContent = c.description || '';
+        document.getElementById('cdash-total-links').textContent = formatNumber(data.total_links);
+        document.getElementById('cdash-active-links').textContent = formatNumber(data.active_links);
+        document.getElementById('cdash-total-clicks').textContent = formatNumber(data.total_clicks);
+        document.getElementById('cdash-clicks-today').textContent = formatNumber(data.clicks_today);
+
+        // Gráfica clicks por día
+        const ctx = document.getElementById('cdash-chart').getContext('2d');
+        const labels = data.clicks_by_day.map(d => {
+          const date = new Date(d.day + 'T12:00:00');
+          return date.toLocaleDateString('es-MX', { month: 'short', day: 'numeric' });
+        });
+        const values = data.clicks_by_day.map(d => d.clicks);
+
+        const gradient = ctx.createLinearGradient(0, 0, 0, 140);
+        gradient.addColorStop(0, c.color + 'cc');
+        gradient.addColorStop(1, c.color + '33');
+
+        state.campaignDashChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [{ label: 'Clicks', data: values, backgroundColor: gradient, borderRadius: 4, borderSkipped: false }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: '#1e1e2a', borderColor: '#2a2a3a', borderWidth: 1,
+                titleColor: '#e2e8f0', bodyColor: '#94a3b8',
+                callbacks: { label: (item) => ` ${item.raw} click${item.raw !== 1 ? 's' : ''}` }
+              }
+            },
+            scales: {
+              x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 10 }, maxTicksLimit: 10 } },
+              y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', precision: 0 }, beginAtZero: true }
+            }
+          }
+        });
+
+        // Top links
+        if (data.top_links && data.top_links.length > 0) {
+          const baseUrl = window.location.origin;
+          document.getElementById('cdash-top-links').innerHTML = data.top_links.map((l, i) => `
+            <div class="campaign-top-link-item">
+              <span class="campaign-top-link-rank">#${i + 1}</span>
+              <span class="campaign-top-link-code">/${escHtml(l.code)}</span>
+              <span class="campaign-top-link-url" title="${escHtml(l.original_url)}">${escHtml(l.original_url)}</span>
+              <span class="campaign-top-link-clicks">${formatNumber(l.clicks)} clicks</span>
+            </div>`).join('');
+          document.getElementById('cdash-top-links-section').style.display = 'block';
+        }
+
+        // Breakdowns
+        if (data.device_breakdown || data.country_breakdown) {
+          renderBreakdownList('cdash-device-list', data.device_breakdown, 'device', 'count',
+            item => DEVICE_ICONS[item.device] || '💻');
+          renderBreakdownList('cdash-country-list', data.country_breakdown, 'country', 'count',
+            item => countryFlag(item.country_code));
+          renderBreakdownList('cdash-browser-list', data.browser_breakdown, 'browser', 'count',
+            item => BROWSER_ICONS[item.browser] || '🌐');
+          renderBreakdownList('cdash-os-list', data.os_breakdown, 'os', 'count', null);
+          document.getElementById('cdash-breakdown-grid').style.display = 'grid';
+        }
+      } catch (err) {
+        document.getElementById('cdash-title').textContent = 'Error';
+        toast(err.message, 'error');
+      }
+    }
+
+    document.getElementById('cdash-close').addEventListener('click', () =>
+      document.getElementById('campaign-dashboard-modal').classList.remove('active'));
+    document.getElementById('campaign-dashboard-modal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('campaign-dashboard-modal'))
+        document.getElementById('campaign-dashboard-modal').classList.remove('active');
+    });
+    document.getElementById('create-campaign-modal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('create-campaign-modal'))
+        document.getElementById('create-campaign-modal').classList.remove('active');
     });
 
     // ═══════════════════════════════════════════════════════════

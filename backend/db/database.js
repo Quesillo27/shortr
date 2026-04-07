@@ -50,6 +50,24 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_links_created ON links(created_at DESC);
 `);
 
+// Tabla de campañas
+db.exec(`
+  CREATE TABLE IF NOT EXISTS campaigns (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    name        TEXT NOT NULL,
+    description TEXT,
+    color       TEXT DEFAULT '#7c6af7',
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+`);
+
+// Migración links: agregar campaign_id si no existe
+const linkCols = db.prepare('PRAGMA table_info(links)').all().map(c => c.name);
+if (!linkCols.includes('campaign_id')) {
+  db.exec('ALTER TABLE links ADD COLUMN campaign_id INTEGER');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_links_campaign ON links(campaign_id)');
+}
+
 // Migración: agregar columnas de enriquecimiento de clicks si no existen
 const existingCols = db.prepare('PRAGMA table_info(clicks)').all().map(c => c.name);
 const newCols = [

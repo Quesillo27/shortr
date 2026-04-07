@@ -119,7 +119,8 @@ app.post('/api/auth/login', loginLimiter, (req, res) => {
 });
 
 // ─── Rutas de la API ──────────────────────────────────────────────────────────
-app.use('/api/links', apiLimiter, require('./backend/routes/links'));
+app.use('/api/campaigns', apiLimiter, require('./backend/routes/campaigns'));
+app.use('/api/links',     apiLimiter, require('./backend/routes/links'));
 app.use('/api/analytics', apiLimiter, require('./backend/routes/analytics'));
 
 // ─── Redirect por código (DEBE ir después de las rutas API) ──────────────────
