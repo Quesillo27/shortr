@@ -818,6 +818,191 @@
       .nav-user span { display: none; }
     }
 
+    /* ===== Nav tabs ===== */
+    .nav-tabs {
+      display: flex;
+      gap: 0.25rem;
+      background: var(--bg3);
+      border-radius: 10px;
+      padding: 3px;
+    }
+    .nav-tab {
+      padding: 0.35rem 1rem;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text2);
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+    .nav-tab:hover { color: var(--text); }
+    .nav-tab.active {
+      background: var(--bg2);
+      color: var(--text);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+
+    /* ===== Campaign cards grid ===== */
+    .campaigns-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .campaign-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+    }
+    .campaign-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .campaign-card-color { height: 5px; }
+    .campaign-card-body { padding: 1.1rem; }
+    .campaign-card-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .campaign-card-desc {
+      font-size: 0.78rem;
+      color: var(--text3);
+      margin-bottom: 0.9rem;
+      line-height: 1.4;
+      min-height: 1.1rem;
+    }
+    .campaign-card-stats {
+      display: flex;
+      gap: 1.25rem;
+    }
+    .campaign-card-stat { text-align: center; }
+    .campaign-card-stat .val {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .campaign-card-stat .lbl {
+      font-size: 0.68rem;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .campaign-card-footer {
+      padding: 0.6rem 1.1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--text3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .campaign-card-footer .open-hint {
+      color: var(--accent2);
+      font-weight: 500;
+      font-size: 0.75rem;
+    }
+    .campaign-card-add {
+      background: var(--bg2);
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: var(--text3);
+      transition: border-color var(--transition), color var(--transition);
+      min-height: 160px;
+    }
+    .campaign-card-add:hover { border-color: var(--accent); color: var(--accent); }
+    .campaign-card-add .add-icon { font-size: 1.5rem; }
+    .campaign-card-add span { font-size: 0.85rem; font-weight: 500; }
+
+    /* ===== Campaign detail view ===== */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .campaign-detail-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.8rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text2);
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all var(--transition);
+      flex-shrink: 0;
+    }
+    .back-btn:hover { border-color: var(--accent); color: var(--text); }
+
+    .campaign-detail-title {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex: 1;
+    }
+    .campaign-detail-dot {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .campaign-detail-title h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .campaign-detail-title p {
+      font-size: 0.8rem;
+      color: var(--text3);
+      margin-top: 1px;
+    }
+    .campaign-detail-actions { display: flex; gap: 0.5rem; margin-left: auto; }
+
+    /* Chart inline para campaña */
+    .campaign-chart-panel {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.25rem 0.9rem;
+      margin-bottom: 1.25rem;
+    }
+    .campaign-chart-panel .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      font-size: 0.8rem;
+      color: var(--text3);
+    }
+    .campaign-chart-panel .chart-header strong {
+      color: var(--text2);
+      font-size: 0.85rem;
+    }
+    .campaign-chart-inline { height: 130px; }
+
     /* ===== Campañas ===== */
     .campaign-bar {
       display: flex;
@@ -1180,19 +1365,168 @@
         <div class="nav-logo-mark">&#128279;</div>
         <span>Shortr</span>
       </a>
+      <div class="nav-tabs">
+        <button class="nav-tab active" id="tab-campaigns" onclick="switchSection('campaigns')">Campañas</button>
+        <button class="nav-tab" id="tab-general" onclick="switchSection('general')">General</button>
+      </div>
       <div class="nav-actions">
         <div class="nav-user">
           <div class="nav-avatar" id="nav-avatar">A</div>
           <span id="nav-username">admin</span>
         </div>
-        <button class="btn btn-ghost btn-sm" id="logout-btn">
-          Cerrar sesion
-        </button>
+        <button class="btn btn-ghost btn-sm" id="logout-btn">Cerrar sesion</button>
       </div>
     </nav>
 
-    <div class="main-content">
-      <!-- Stats Cards -->
+    <!-- ── SECCIÓN CAMPAÑAS ─────────────────────────────── -->
+    <div id="section-campaigns" class="main-content section active">
+
+      <!-- Vista: grid de campañas -->
+      <div id="campaigns-grid-view">
+        <div class="campaigns-grid" id="campaigns-grid">
+          <!-- tarjetas dinámicas -->
+        </div>
+      </div>
+
+      <!-- Vista: detalle de campaña -->
+      <div id="campaign-detail-view" style="display:none">
+        <!-- Encabezado campaña -->
+        <div class="campaign-detail-header">
+          <button class="back-btn" onclick="backToCampaigns()">&#8592; Campañas</button>
+          <div class="campaign-detail-title">
+            <div class="campaign-detail-dot" id="cd-dot"></div>
+            <div>
+              <h2 id="cd-name">—</h2>
+              <p id="cd-desc"></p>
+            </div>
+          </div>
+          <div class="campaign-detail-actions">
+            <button class="btn btn-ghost btn-sm" id="cd-edit-btn">&#9998; Editar</button>
+            <button class="btn btn-ghost btn-sm" style="color:var(--danger)" id="cd-delete-btn">Eliminar</button>
+          </div>
+        </div>
+
+        <!-- Stats de campaña -->
+        <div class="stats-grid" id="cd-stats-grid" style="margin-bottom:1.25rem">
+          <div class="stat-card">
+            <div class="stat-icon purple">&#128279;</div>
+            <div class="stat-value" id="cd-total-links">--</div>
+            <div class="stat-label">Links</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">&#9889;</div>
+            <div class="stat-value" id="cd-active-links">--</div>
+            <div class="stat-label">Activos</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon blue">&#128432;</div>
+            <div class="stat-value" id="cd-total-clicks">--</div>
+            <div class="stat-label">Clicks Totales</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon amber">&#8679;</div>
+            <div class="stat-value" id="cd-clicks-today">--</div>
+            <div class="stat-label">Clicks Hoy</div>
+          </div>
+        </div>
+
+        <!-- Gráfica 30 días de campaña -->
+        <div class="campaign-chart-panel" id="cd-chart-panel">
+          <div class="chart-header">
+            <strong>Clicks — últimos 30 días</strong>
+            <span id="cd-chart-info"></span>
+          </div>
+          <div class="campaign-chart-inline">
+            <canvas id="cd-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Breakdowns de campaña -->
+        <div class="breakdown-grid" id="cd-breakdown-grid" style="margin-bottom:1.25rem;display:none">
+          <div class="breakdown-panel"><h4>&#128241; Dispositivos</h4><div id="cd-device-list"></div></div>
+          <div class="breakdown-panel"><h4>&#127760; Países</h4><div id="cd-country-list"></div></div>
+          <div class="breakdown-panel"><h4>&#127758; Navegadores</h4><div id="cd-browser-list"></div></div>
+          <div class="breakdown-panel"><h4>&#128187; Sistema Operativo</h4><div id="cd-os-list"></div></div>
+        </div>
+
+        <!-- Panel de crear link dentro de campaña -->
+        <div class="create-panel" style="margin-bottom:1.25rem">
+          <div class="panel-header">
+            <h2>Acortar URL</h2>
+            <button class="advanced-toggle" id="advanced-toggle">
+              <span>&#9660;</span> Opciones avanzadas
+            </button>
+          </div>
+          <form id="create-form">
+            <div class="create-form">
+              <div class="form-group">
+                <label for="new-url">URL a acortar *</label>
+                <input type="url" id="new-url" placeholder="https://ejemplo.com/pagina-muy-larga" required />
+              </div>
+              <div class="form-group">
+                <label>&nbsp;</label>
+                <button type="submit" class="btn btn-primary" id="create-btn">Acortar</button>
+              </div>
+            </div>
+            <div class="advanced-fields" id="advanced-fields">
+              <div class="form-group">
+                <label for="new-alias">Alias personalizado</label>
+                <input type="text" id="new-alias" placeholder="mi-link-corto" pattern="[a-zA-Z0-9_-]{2,30}" />
+              </div>
+              <div class="form-group">
+                <label for="new-expires">Fecha de expiración</label>
+                <input type="datetime-local" id="new-expires" />
+              </div>
+            </div>
+          </form>
+          <div id="create-result" style="display:none;margin-top:1rem">
+            <div class="short-url-box">
+              <a href="#" id="result-url" target="_blank" rel="noopener">...</a>
+              <button class="btn btn-ghost btn-sm" id="copy-result-btn">Copiar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabla de links de campaña -->
+        <div class="links-panel">
+          <div class="panel-header">
+            <h2>Links</h2>
+            <div class="flex items-center gap-2">
+              <div class="search-wrap">
+                <span class="search-icon">&#128269;</span>
+                <input type="text" id="search-input" placeholder="Buscar alias o URL..." />
+              </div>
+              <button class="btn btn-ghost btn-sm" id="refresh-btn">&#8635;</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Alias</th>
+                  <th>URL Original</th>
+                  <th>Clicks</th>
+                  <th>Estado</th>
+                  <th>Creado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="links-tbody">
+                <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">&#128279;</div><p>Cargando...</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination" id="pagination" style="display:none">
+            <span id="pagination-info">—</span>
+            <div class="pagination-controls" id="pagination-controls"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /section-campaigns -->
+
+    <!-- ── SECCIÓN GENERAL ─────────────────────────────── -->
+    <div id="section-general" class="main-content section">
       <div class="stats-grid" id="stats-grid">
         <div class="stat-card">
           <div class="stat-icon purple">&#128279;</div>
@@ -1215,133 +1549,17 @@
           <div class="stat-label">Links Activos</div>
         </div>
       </div>
-
-      <!-- Gráfica de actividad global -->
       <div class="activity-panel">
         <div class="activity-header">
-          <h3>&#128200; Actividad — últimos 14 días</h3>
+          <h3>&#128200; Actividad global — últimos 14 días</h3>
           <span class="activity-total" id="activity-total"></span>
         </div>
         <div class="activity-chart-wrap">
           <canvas id="activity-chart"></canvas>
         </div>
       </div>
+    </div><!-- /section-general -->
 
-      <!-- Panel de crear link -->
-      <div class="create-panel">
-        <div class="panel-header">
-          <h2>Acortar URL</h2>
-          <button class="advanced-toggle" id="advanced-toggle">
-            <span>&#9660;</span> Opciones avanzadas
-          </button>
-        </div>
-
-        <form id="create-form">
-          <div class="create-form">
-            <div class="form-group">
-              <label for="new-url">URL a acortar *</label>
-              <input
-                type="url"
-                id="new-url"
-                placeholder="https://ejemplo.com/pagina-muy-larga"
-                required
-              />
-            </div>
-            <div class="form-group">
-              <label>&nbsp;</label>
-              <button type="submit" class="btn btn-primary" id="create-btn">
-                Acortar
-              </button>
-            </div>
-          </div>
-
-          <div class="advanced-fields" id="advanced-fields">
-            <div class="form-group">
-              <label for="new-alias">Alias personalizado</label>
-              <input
-                type="text"
-                id="new-alias"
-                placeholder="mi-link-corto"
-                pattern="[a-zA-Z0-9_-]{2,30}"
-              />
-            </div>
-            <div class="form-group">
-              <label for="new-expires">Fecha de expiracion</label>
-              <input type="datetime-local" id="new-expires" />
-            </div>
-            <div class="form-group">
-              <label for="new-campaign">Campaña</label>
-              <select id="new-campaign">
-                <option value="">Sin campaña</option>
-              </select>
-            </div>
-          </div>
-        </form>
-
-        <!-- URL creada (resultado) -->
-        <div id="create-result" style="display:none; margin-top:1rem;">
-          <div class="short-url-box">
-            <a href="#" id="result-url" target="_blank" rel="noopener">...</a>
-            <button class="btn btn-ghost btn-sm" id="copy-result-btn">
-              Copiar
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tabla de links -->
-      <div class="links-panel">
-        <div class="panel-header">
-          <h2>Mis Links</h2>
-          <div class="flex items-center gap-2">
-            <div class="search-wrap">
-              <span class="search-icon">&#128269;</span>
-              <input type="text" id="search-input" placeholder="Buscar por alias o URL..." />
-            </div>
-            <button class="btn btn-ghost btn-sm" id="refresh-btn">
-              &#8635; Actualizar
-            </button>
-          </div>
-        </div>
-
-        <!-- Barra de campañas -->
-        <div class="campaign-bar" id="campaign-bar">
-          <div class="campaign-pill active" data-id="" onclick="setActiveCampaign(null)">
-            Todas
-          </div>
-          <!-- pills dinámicos aquí -->
-        </div>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Alias</th>
-                <th>URL Original</th>
-                <th>Clicks</th>
-                <th>Estado</th>
-                <th>Creado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="links-tbody">
-              <tr>
-                <td colspan="6">
-                  <div class="empty-state">
-                    <div class="empty-icon">&#128279;</div>
-                    <p>Cargando links...</p>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="pagination" id="pagination" style="display:none;">
-          <span id="pagination-info">—</span>
-          <div class="pagination-controls" id="pagination-controls"></div>
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- ===== MODAL DE ANALYTICS ===== -->
@@ -1446,75 +1664,6 @@
     </div>
   </div>
 
-  <!-- ===== MODAL DASHBOARD DE CAMPAÑA ===== -->
-  <div class="modal-overlay" id="campaign-dashboard-modal">
-    <div class="modal" style="max-width:680px">
-      <div class="modal-header">
-        <div class="modal-title">
-          <h3 id="cdash-title">Campaña</h3>
-          <p id="cdash-desc"></p>
-        </div>
-        <button class="modal-close" id="cdash-close">&#215;</button>
-      </div>
-      <div class="modal-body">
-        <div class="campaign-modal-header-color" id="cdash-color-bar"></div>
-
-        <!-- Stats de campaña -->
-        <div class="analytics-stats" style="grid-template-columns:repeat(4,1fr)">
-          <div class="analytics-stat">
-            <div class="value" id="cdash-total-links">--</div>
-            <div class="label">Links</div>
-          </div>
-          <div class="analytics-stat">
-            <div class="value" id="cdash-active-links">--</div>
-            <div class="label">Activos</div>
-          </div>
-          <div class="analytics-stat">
-            <div class="value" id="cdash-total-clicks">--</div>
-            <div class="label">Clicks Totales</div>
-          </div>
-          <div class="analytics-stat">
-            <div class="value" id="cdash-clicks-today">--</div>
-            <div class="label">Clicks Hoy</div>
-          </div>
-        </div>
-
-        <!-- Gráfica de clicks por día -->
-        <div class="chart-container" style="margin-top:1rem">
-          <canvas id="cdash-chart"></canvas>
-        </div>
-
-        <!-- Top links -->
-        <div id="cdash-top-links-section" style="margin-top:1rem;display:none">
-          <h4 style="font-size:0.75rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem">
-            Top Links
-          </h4>
-          <div id="cdash-top-links"></div>
-        </div>
-
-        <!-- Breakdowns -->
-        <div class="breakdown-grid" id="cdash-breakdown-grid" style="display:none;margin-top:0">
-          <div class="breakdown-panel">
-            <h4>&#128241; Dispositivos</h4>
-            <div id="cdash-device-list"></div>
-          </div>
-          <div class="breakdown-panel">
-            <h4>&#127760; Países</h4>
-            <div id="cdash-country-list"></div>
-          </div>
-          <div class="breakdown-panel">
-            <h4>&#127758; Navegadores</h4>
-            <div id="cdash-browser-list"></div>
-          </div>
-          <div class="breakdown-panel">
-            <h4>&#128187; Sistema Operativo</h4>
-            <div id="cdash-os-list"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- ===== Toast container ===== -->
   <div class="toast-container" id="toast-container"></div>
 
@@ -1529,14 +1678,15 @@
       analyticsChart: null,
       activityChart: null,
       hourlyChart: null,
-      campaignDashChart: null,
+      cdChart: null,         // chart inline campaña
+      currentSection: 'campaigns',
+      currentCampaign: null, // objeto campaña seleccionada
+      campaigns: [],
       page: 1,
       limit: 20,
       search: '',
       totalLinks: 0,
       totalPages: 1,
-      campaigns: [],
-      activeCampaign: null, // null = Todas
     };
 
     // ═══════════════════════════════════════════════════════════
@@ -1672,29 +1822,38 @@
     // DASHBOARD — CARGA DE DATOS
     // ═══════════════════════════════════════════════════════════
 
-    async function loadDashboard() {
-      await Promise.all([loadStats(), loadLinks(), loadCampaigns()]);
+    // ── Secciones ─────────────────────────────────────────────
+
+    function switchSection(name) {
+      state.currentSection = name;
+      document.getElementById('section-campaigns').classList.toggle('active', name === 'campaigns');
+      document.getElementById('section-general').classList.toggle('active', name === 'general');
+      document.getElementById('tab-campaigns').classList.toggle('active', name === 'campaigns');
+      document.getElementById('tab-general').classList.toggle('active', name === 'general');
+      if (name === 'general') loadGeneralSection();
     }
 
-    async function loadStats() {
+    async function loadDashboard() {
+      await loadCampaigns(); // carga grid de campañas por defecto
+    }
+
+    // ── Sección General ────────────────────────────────────────
+
+    async function loadGeneralSection() {
       try {
         const data = await apiFetch('/api/analytics/summary');
         document.getElementById('stat-total-links').textContent = formatNumber(data.total_links);
         document.getElementById('stat-total-clicks').textContent = formatNumber(data.total_clicks);
         document.getElementById('stat-clicks-today').textContent = formatNumber(data.clicks_today);
         document.getElementById('stat-active-links').textContent = formatNumber(data.active_links);
-
-        if (data.clicks_by_day) {
-          renderActivityChart(data.clicks_by_day);
-        }
+        if (data.clicks_by_day) renderActivityChart(data.clicks_by_day);
       } catch (err) {
-        if (err.message.includes('401') || err.message.includes('Token')) {
-          logout();
-          return;
-        }
-        console.error('Error cargando stats:', err.message);
+        if (err.message.includes('401') || err.message.includes('Token')) logout();
       }
     }
+
+    // alias para el auto-refresh
+    async function loadStats() { if (state.currentSection === 'general') await loadGeneralSection(); }
 
     function renderActivityChart(days) {
       const total = days.reduce((s, d) => s + d.clicks, 0);
@@ -1788,7 +1947,7 @@
       try {
         const params = new URLSearchParams({ page: state.page, limit: state.limit });
         if (state.search) params.set('search', state.search);
-        if (state.activeCampaign !== null) params.set('campaign_id', state.activeCampaign === 'none' ? 'none' : state.activeCampaign);
+        if (state.currentCampaign) params.set('campaign_id', state.currentCampaign.id);
         const data = await apiFetch(`/api/links?${params}`);
         state.links = data.links;
         if (data.pagination) {
@@ -1840,17 +1999,10 @@
           ? `<br><span class="text-xs text-muted">Expira: ${formatDate(link.expires_at)}</span>`
           : '';
 
-        const campaignBadge = link.campaign_name
-          ? `<br><span class="campaign-badge" style="background:${escHtml(link.campaign_color)}22;color:${escHtml(link.campaign_color)}">
-               <span class="badge-dot" style="background:${escHtml(link.campaign_color)}"></span>${escHtml(link.campaign_name)}
-             </span>`
-          : '';
-
         return `
           <tr>
             <td>
               <span class="link-code">${escHtml(link.code)}</span>
-              ${campaignBadge}
             </td>
             <td>
               <div class="link-original" title="${escHtml(link.original_url)}">
@@ -1921,7 +2073,6 @@
       const url = document.getElementById('new-url').value.trim();
       const alias = document.getElementById('new-alias').value.trim();
       const expiresAt = document.getElementById('new-expires').value;
-      const campaignId = document.getElementById('new-campaign').value;
 
       if (!url) return;
 
@@ -1931,7 +2082,7 @@
       const body = { url };
       if (alias) body.alias = alias;
       if (expiresAt) body.expiresAt = new Date(expiresAt).toISOString();
-      if (campaignId) body.campaignId = Number(campaignId);
+      if (state.currentCampaign) body.campaignId = state.currentCampaign.id;
 
       try {
         const data = await apiFetch('/api/links', {
@@ -1950,10 +2101,9 @@
         document.getElementById('new-url').value = '';
         document.getElementById('new-alias').value = '';
         document.getElementById('new-expires').value = '';
-        document.getElementById('new-campaign').value = '';
 
         toast(`Link creado: ${data.short_url}`, 'success');
-        loadDashboard();
+        loadLinks();
       } catch (err) {
         toast(err.message, 'error');
       } finally {
@@ -1968,7 +2118,7 @@
     });
 
     // ═══════════════════════════════════════════════════════════
-    // CAMPAÑAS
+    // CAMPAÑAS — GRID + DETALLE INLINE
     // ═══════════════════════════════════════════════════════════
 
     const CAMPAIGN_COLORS = [
@@ -1980,51 +2130,150 @@
       try {
         const data = await apiFetch('/api/campaigns');
         state.campaigns = data.campaigns;
-        renderCampaignPills();
-        populateCampaignSelect();
+        renderCampaignGrid();
       } catch (err) {
         if (err.message.includes('401') || err.message.includes('Token')) logout();
       }
     }
 
-    function renderCampaignPills() {
-      const bar = document.getElementById('campaign-bar');
-      const allActive = state.activeCampaign === null;
+    function renderCampaignGrid() {
+      const grid = document.getElementById('campaigns-grid');
+      if (!grid) return;
 
-      let html = `<div class="campaign-pill ${allActive ? 'active' : ''}" onclick="setActiveCampaign(null)">Todas</div>`;
+      let html = state.campaigns.map(c => `
+        <div class="campaign-card" onclick="openCampaign(${c.id})">
+          <div class="campaign-card-color" style="background:${escHtml(c.color)}"></div>
+          <div class="campaign-card-body">
+            <div class="campaign-card-name">
+              <span style="width:10px;height:10px;border-radius:50%;background:${escHtml(c.color)};flex-shrink:0;display:inline-block"></span>
+              ${escHtml(c.name)}
+            </div>
+            <div class="campaign-card-desc">${escHtml(c.description || '')}</div>
+            <div class="campaign-card-stats">
+              <div class="campaign-card-stat">
+                <div class="val">${formatNumber(c.link_count)}</div>
+                <div class="lbl">Links</div>
+              </div>
+              <div class="campaign-card-stat">
+                <div class="val">${formatNumber(c.total_clicks)}</div>
+                <div class="lbl">Clicks</div>
+              </div>
+            </div>
+          </div>
+          <div class="campaign-card-footer">
+            <span>${formatDate(c.created_at)}</span>
+            <span class="open-hint">Abrir →</span>
+          </div>
+        </div>`).join('');
 
-      state.campaigns.forEach(c => {
-        const isActive = state.activeCampaign === c.id;
-        html += `
-          <div class="campaign-pill ${isActive ? 'active' : ''}" onclick="setActiveCampaign(${c.id})" title="${escHtml(c.description || c.name)}">
-            <span class="pill-dot" style="background:${escHtml(c.color)}"></span>
-            ${escHtml(c.name)}
-            <span class="pill-count">${c.link_count}</span>
-            <button onclick="event.stopPropagation();openCampaignDashboard(${c.id})" style="background:none;border:none;cursor:pointer;padding:0;color:inherit;opacity:.7;font-size:.85rem" title="Ver dashboard">&#128200;</button>
-            <button onclick="event.stopPropagation();deleteCampaign(${c.id},'${escHtml(c.name)}')" style="background:none;border:none;cursor:pointer;padding:0;color:var(--danger);opacity:.6;font-size:.8rem" title="Eliminar campaña">&#215;</button>
-          </div>`;
-      });
+      // Card "+ Nueva campaña"
+      html += `
+        <div class="campaign-card-add" onclick="openCreateCampaignModal()">
+          <span class="add-icon">&#43;</span>
+          <span>Nueva campaña</span>
+        </div>`;
 
-      html += `<button class="campaign-pill-add" onclick="openCreateCampaignModal()">&#43; Campaña</button>`;
-      bar.innerHTML = html;
+      grid.innerHTML = html;
     }
 
-    function populateCampaignSelect() {
-      const sel = document.getElementById('new-campaign');
-      sel.innerHTML = '<option value="">Sin campaña</option>';
-      state.campaigns.forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c.id;
-        opt.textContent = c.name;
-        sel.appendChild(opt);
-      });
-    }
+    // ── Abrir campaña (vista detalle) ──────────────────────────
 
-    function setActiveCampaign(id) {
-      state.activeCampaign = id;
+    async function openCampaign(id) {
+      const campaign = state.campaigns.find(c => c.id === id);
+      if (!campaign) return;
+
+      state.currentCampaign = campaign;
       state.page = 1;
-      renderCampaignPills();
-      loadLinks();
+      state.search = '';
+      document.getElementById('search-input').value = '';
+
+      // Mostrar vista detalle
+      document.getElementById('campaigns-grid-view').style.display = 'none';
+      document.getElementById('campaign-detail-view').style.display = 'block';
+
+      // Actualizar encabezado
+      document.getElementById('cd-dot').style.background = campaign.color;
+      document.getElementById('cd-name').textContent = campaign.name;
+      document.getElementById('cd-desc').textContent = campaign.description || '';
+
+      // Botones de acción
+      document.getElementById('cd-edit-btn').onclick = () => openEditCampaignModal(campaign);
+      document.getElementById('cd-delete-btn').onclick = () => deleteCampaign(campaign.id, campaign.name);
+
+      // Reiniciar chart inline
+      if (state.cdChart) { state.cdChart.destroy(); state.cdChart = null; }
+
+      // Cargar en paralelo: analytics + links
+      await Promise.all([loadCampaignAnalytics(id), loadLinks()]);
+    }
+
+    function backToCampaigns() {
+      state.currentCampaign = null;
+      document.getElementById('campaign-detail-view').style.display = 'none';
+      document.getElementById('campaigns-grid-view').style.display = 'block';
+      document.getElementById('create-result').style.display = 'none';
+      loadCampaigns();
+    }
+
+    // ── Analytics inline de campaña ───────────────────────────
+
+    async function loadCampaignAnalytics(id) {
+      try {
+        const data = await apiFetch(`/api/analytics/campaign/${id}`);
+        const c = data.campaign;
+
+        document.getElementById('cd-total-links').textContent  = formatNumber(data.total_links);
+        document.getElementById('cd-active-links').textContent = formatNumber(data.active_links);
+        document.getElementById('cd-total-clicks').textContent = formatNumber(data.total_clicks);
+        document.getElementById('cd-clicks-today').textContent = formatNumber(data.clicks_today);
+
+        const total = data.clicks_by_day.reduce((s, d) => s + d.clicks, 0);
+        document.getElementById('cd-chart-info').textContent =
+          total > 0 ? `${formatNumber(total)} clicks en 30 días` : 'Sin clicks aún';
+
+        // Gráfica inline 30 días
+        const ctx = document.getElementById('cd-chart').getContext('2d');
+        const labels = data.clicks_by_day.map(d => {
+          return new Date(d.day + 'T12:00:00').toLocaleDateString('es-MX', { month: 'short', day: 'numeric' });
+        });
+        const values = data.clicks_by_day.map(d => d.clicks);
+        const gradient = ctx.createLinearGradient(0, 0, 0, 130);
+        gradient.addColorStop(0, c.color + 'cc');
+        gradient.addColorStop(1, c.color + '22');
+
+        state.cdChart = new Chart(ctx, {
+          type: 'bar',
+          data: { labels, datasets: [{ data: values, backgroundColor: gradient, borderRadius: 3, borderSkipped: false }] },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: '#1e1e2a', borderColor: '#2a2a3a', borderWidth: 1,
+                titleColor: '#e2e8f0', bodyColor: '#94a3b8',
+                callbacks: { label: (item) => ` ${item.raw} click${item.raw !== 1 ? 's' : ''}` }
+              }
+            },
+            scales: {
+              x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 9 }, maxTicksLimit: 10 } },
+              y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', precision: 0 }, beginAtZero: true }
+            }
+          }
+        });
+
+        // Breakdowns
+        if (data.total_clicks > 0) {
+          renderBreakdownList('cd-device-list',  data.device_breakdown,  'device',  'count', item => DEVICE_ICONS[item.device] || '💻');
+          renderBreakdownList('cd-country-list', data.country_breakdown, 'country', 'count', item => countryFlag(item.country_code));
+          renderBreakdownList('cd-browser-list', data.browser_breakdown, 'browser', 'count', item => BROWSER_ICONS[item.browser] || '🌐');
+          renderBreakdownList('cd-os-list',      data.os_breakdown,      'os',      'count', null);
+          document.getElementById('cd-breakdown-grid').style.display = 'grid';
+        } else {
+          document.getElementById('cd-breakdown-grid').style.display = 'none';
+        }
+      } catch (err) {
+        console.error('Error cargando analytics de campaña:', err.message);
+      }
     }
 
     // ── Crear campaña ──────────────────────────────────────────
@@ -2037,13 +2286,29 @@
       const swatches = document.getElementById('color-swatches');
       swatches.innerHTML = CAMPAIGN_COLORS.map((c, i) => `
         <div class="color-swatch ${i === 0 ? 'selected' : ''}"
-          style="background:${c}"
-          onclick="selectCampColor('${c}', this)"
-          title="${c}">
+          style="background:${c}" onclick="selectCampColor('${c}', this)" title="${c}">
         </div>`).join('');
 
       document.getElementById('create-campaign-modal').classList.add('active');
       setTimeout(() => document.getElementById('camp-name').focus(), 50);
+    }
+
+    function openEditCampaignModal(campaign) {
+      document.getElementById('camp-name').value = campaign.name;
+      document.getElementById('camp-desc').value = campaign.description || '';
+      document.getElementById('camp-color').value = campaign.color;
+
+      const swatches = document.getElementById('color-swatches');
+      swatches.innerHTML = CAMPAIGN_COLORS.map(c => `
+        <div class="color-swatch ${c === campaign.color ? 'selected' : ''}"
+          style="background:${c}" onclick="selectCampColor('${c}', this)" title="${c}">
+        </div>`).join('');
+
+      // Cambiar el submit a modo edición
+      const form = document.getElementById('create-campaign-form');
+      form.dataset.editId = campaign.id;
+      document.getElementById('create-campaign-btn').textContent = 'Guardar cambios';
+      document.getElementById('create-campaign-modal').classList.add('active');
     }
 
     function selectCampColor(color, el) {
@@ -2052,33 +2317,66 @@
       el.classList.add('selected');
     }
 
-    document.getElementById('create-campaign-close').addEventListener('click', () =>
-      document.getElementById('create-campaign-modal').classList.remove('active'));
-    document.getElementById('create-campaign-cancel').addEventListener('click', () =>
-      document.getElementById('create-campaign-modal').classList.remove('active'));
+    document.getElementById('create-campaign-close').addEventListener('click', () => {
+      document.getElementById('create-campaign-modal').classList.remove('active');
+      delete document.getElementById('create-campaign-form').dataset.editId;
+      document.getElementById('create-campaign-btn').textContent = 'Crear campaña';
+    });
+    document.getElementById('create-campaign-cancel').addEventListener('click', () => {
+      document.getElementById('create-campaign-modal').classList.remove('active');
+      delete document.getElementById('create-campaign-form').dataset.editId;
+      document.getElementById('create-campaign-btn').textContent = 'Crear campaña';
+    });
+    document.getElementById('create-campaign-modal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('create-campaign-modal')) {
+        document.getElementById('create-campaign-modal').classList.remove('active');
+        delete document.getElementById('create-campaign-form').dataset.editId;
+        document.getElementById('create-campaign-btn').textContent = 'Crear campaña';
+      }
+    });
 
     document.getElementById('create-campaign-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const btn = document.getElementById('create-campaign-btn');
-      const name  = document.getElementById('camp-name').value.trim();
-      const desc  = document.getElementById('camp-desc').value.trim();
-      const color = document.getElementById('camp-color').value;
+      const btn    = document.getElementById('create-campaign-btn');
+      const name   = document.getElementById('camp-name').value.trim();
+      const desc   = document.getElementById('camp-desc').value.trim();
+      const color  = document.getElementById('camp-color').value;
+      const editId = e.target.dataset.editId;
 
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span>';
       try {
-        await apiFetch('/api/campaigns', {
-          method: 'POST',
-          body: JSON.stringify({ name, description: desc || undefined, color })
-        });
+        if (editId) {
+          await apiFetch(`/api/campaigns/${editId}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ name, description: desc || null, color })
+          });
+          toast(`Campaña actualizada`, 'success');
+        } else {
+          await apiFetch('/api/campaigns', {
+            method: 'POST',
+            body: JSON.stringify({ name, description: desc || undefined, color })
+          });
+          toast(`Campaña "${name}" creada`, 'success');
+        }
         document.getElementById('create-campaign-modal').classList.remove('active');
-        toast(`Campaña "${name}" creada`, 'success');
+        delete e.target.dataset.editId;
         await loadCampaigns();
+        // Si estábamos en detalle, recargar analytics
+        if (state.currentCampaign && editId && state.currentCampaign.id === Number(editId)) {
+          const updated = state.campaigns.find(c => c.id === Number(editId));
+          if (updated) {
+            state.currentCampaign = updated;
+            document.getElementById('cd-dot').style.background = updated.color;
+            document.getElementById('cd-name').textContent = updated.name;
+            document.getElementById('cd-desc').textContent = updated.description || '';
+          }
+        }
       } catch (err) {
         toast(err.message, 'error');
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Crear campaña';
+        btn.textContent = editId ? 'Guardar cambios' : 'Crear campaña';
       }
     });
 
@@ -2087,116 +2385,12 @@
       try {
         await apiFetch(`/api/campaigns/${id}`, { method: 'DELETE' });
         toast(`Campaña "${name}" eliminada`, 'success');
-        if (state.activeCampaign === id) state.activeCampaign = null;
-        await Promise.all([loadCampaigns(), loadLinks()]);
+        if (state.currentCampaign && state.currentCampaign.id === id) backToCampaigns();
+        else await loadCampaigns();
       } catch (err) {
         toast(err.message, 'error');
       }
     }
-
-    // ── Dashboard de campaña ───────────────────────────────────
-
-    async function openCampaignDashboard(id) {
-      const modal = document.getElementById('campaign-dashboard-modal');
-      modal.classList.add('active');
-
-      document.getElementById('cdash-title').textContent = 'Cargando...';
-      document.getElementById('cdash-desc').textContent = '';
-      ['cdash-total-links','cdash-active-links','cdash-total-clicks','cdash-clicks-today']
-        .forEach(el => document.getElementById(el).textContent = '--');
-      document.getElementById('cdash-top-links-section').style.display = 'none';
-      document.getElementById('cdash-breakdown-grid').style.display = 'none';
-
-      if (state.campaignDashChart) { state.campaignDashChart.destroy(); state.campaignDashChart = null; }
-
-      try {
-        const data = await apiFetch(`/api/analytics/campaign/${id}`);
-        const c = data.campaign;
-
-        document.getElementById('cdash-color-bar').style.background = c.color;
-        document.getElementById('cdash-title').textContent = c.name;
-        document.getElementById('cdash-desc').textContent = c.description || '';
-        document.getElementById('cdash-total-links').textContent = formatNumber(data.total_links);
-        document.getElementById('cdash-active-links').textContent = formatNumber(data.active_links);
-        document.getElementById('cdash-total-clicks').textContent = formatNumber(data.total_clicks);
-        document.getElementById('cdash-clicks-today').textContent = formatNumber(data.clicks_today);
-
-        // Gráfica clicks por día
-        const ctx = document.getElementById('cdash-chart').getContext('2d');
-        const labels = data.clicks_by_day.map(d => {
-          const date = new Date(d.day + 'T12:00:00');
-          return date.toLocaleDateString('es-MX', { month: 'short', day: 'numeric' });
-        });
-        const values = data.clicks_by_day.map(d => d.clicks);
-
-        const gradient = ctx.createLinearGradient(0, 0, 0, 140);
-        gradient.addColorStop(0, c.color + 'cc');
-        gradient.addColorStop(1, c.color + '33');
-
-        state.campaignDashChart = new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels,
-            datasets: [{ label: 'Clicks', data: values, backgroundColor: gradient, borderRadius: 4, borderSkipped: false }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                backgroundColor: '#1e1e2a', borderColor: '#2a2a3a', borderWidth: 1,
-                titleColor: '#e2e8f0', bodyColor: '#94a3b8',
-                callbacks: { label: (item) => ` ${item.raw} click${item.raw !== 1 ? 's' : ''}` }
-              }
-            },
-            scales: {
-              x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 10 }, maxTicksLimit: 10 } },
-              y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', precision: 0 }, beginAtZero: true }
-            }
-          }
-        });
-
-        // Top links
-        if (data.top_links && data.top_links.length > 0) {
-          const baseUrl = window.location.origin;
-          document.getElementById('cdash-top-links').innerHTML = data.top_links.map((l, i) => `
-            <div class="campaign-top-link-item">
-              <span class="campaign-top-link-rank">#${i + 1}</span>
-              <span class="campaign-top-link-code">/${escHtml(l.code)}</span>
-              <span class="campaign-top-link-url" title="${escHtml(l.original_url)}">${escHtml(l.original_url)}</span>
-              <span class="campaign-top-link-clicks">${formatNumber(l.clicks)} clicks</span>
-            </div>`).join('');
-          document.getElementById('cdash-top-links-section').style.display = 'block';
-        }
-
-        // Breakdowns
-        if (data.device_breakdown || data.country_breakdown) {
-          renderBreakdownList('cdash-device-list', data.device_breakdown, 'device', 'count',
-            item => DEVICE_ICONS[item.device] || '💻');
-          renderBreakdownList('cdash-country-list', data.country_breakdown, 'country', 'count',
-            item => countryFlag(item.country_code));
-          renderBreakdownList('cdash-browser-list', data.browser_breakdown, 'browser', 'count',
-            item => BROWSER_ICONS[item.browser] || '🌐');
-          renderBreakdownList('cdash-os-list', data.os_breakdown, 'os', 'count', null);
-          document.getElementById('cdash-breakdown-grid').style.display = 'grid';
-        }
-      } catch (err) {
-        document.getElementById('cdash-title').textContent = 'Error';
-        toast(err.message, 'error');
-      }
-    }
-
-    document.getElementById('cdash-close').addEventListener('click', () =>
-      document.getElementById('campaign-dashboard-modal').classList.remove('active'));
-    document.getElementById('campaign-dashboard-modal').addEventListener('click', (e) => {
-      if (e.target === document.getElementById('campaign-dashboard-modal'))
-        document.getElementById('campaign-dashboard-modal').classList.remove('active');
-    });
-    document.getElementById('create-campaign-modal').addEventListener('click', (e) => {
-      if (e.target === document.getElementById('create-campaign-modal'))
-        document.getElementById('create-campaign-modal').classList.remove('active');
-    });
 
     // ═══════════════════════════════════════════════════════════
     // PAGINACIÓN
@@ -2255,7 +2449,7 @@
         const data = await apiFetch(`/api/links/${id}/toggle`, { method: 'PATCH' });
         const label = data.is_active ? 'activado' : 'desactivado';
         toast(`Link ${label}`, data.is_active ? 'success' : 'info');
-        loadDashboard();
+        loadLinks();
       } catch (err) {
         toast(err.message, 'error');
       }
@@ -2271,7 +2465,7 @@
       try {
         await apiFetch(`/api/links/${id}`, { method: 'DELETE' });
         toast(`Link "/${code}" eliminado`, 'success');
-        loadDashboard();
+        loadLinks();
       } catch (err) {
         toast(err.message, 'error');
       }
@@ -2557,14 +2751,18 @@
     // ═══════════════════════════════════════════════════════════
 
     document.getElementById('refresh-btn').addEventListener('click', () => {
-      loadDashboard();
-      toast('Lista actualizada', 'info');
+      if (state.currentCampaign) {
+        Promise.all([loadLinks(), loadCampaignAnalytics(state.currentCampaign.id)]);
+      }
+      toast('Actualizado', 'info');
     });
 
-    // Auto-refresh de stats cada 60 segundos (solo cuando la app está visible)
+    // Auto-refresh cada 60s
     setInterval(() => {
-      if (state.token && document.getElementById('app').style.display !== 'none') {
-        loadStats();
+      if (!state.token) return;
+      if (state.currentSection === 'general') loadGeneralSection();
+      if (state.currentSection === 'campaigns' && state.currentCampaign) {
+        loadCampaignAnalytics(state.currentCampaign.id);
       }
     }, 60000);
 
