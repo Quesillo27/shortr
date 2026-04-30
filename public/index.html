@@ -4,24 +4,27 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shortr — URL Shortener</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <style>
     /* ===== Variables y Reset ===== */
     :root {
-      --bg: #0f0f13;
-      --bg2: #16161e;
-      --bg3: #1e1e2a;
-      --border: #2a2a3a;
-      --accent: #7c6af7;
-      --accent2: #a78bfa;
-      --accent-glow: rgba(124, 106, 247, 0.25);
-      --success: #22c55e;
+      --bg: #f5f7f8;
+      --bg2: #ffffff;
+      --bg3: #edf2f4;
+      --border: #d6dde1;
+      --accent: #0f766e;
+      --accent2: #0ea5a3;
+      --accent-glow: rgba(15, 118, 110, 0.24);
+      --success: #15803d;
       --danger: #ef4444;
-      --warning: #f59e0b;
-      --text: #e2e8f0;
-      --text2: #94a3b8;
-      --text3: #64748b;
-      --card-shadow: 0 4px 24px rgba(0,0,0,0.4);
+      --warning: #d97706;
+      --text: #111827;
+      --text2: #4b5563;
+      --text3: #6b7280;
+      --card-shadow: 0 10px 32px rgba(15, 23, 42, 0.08);
       --radius: 12px;
       --radius-sm: 8px;
       --transition: 0.2s ease;
@@ -30,8 +33,11 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: var(--bg);
+      font-family: 'Manrope', 'Segoe UI', sans-serif;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(14, 165, 163, 0.10) 0%, rgba(14, 165, 163, 0) 32%),
+        radial-gradient(circle at 100% 0%, rgba(20, 184, 166, 0.08) 0%, rgba(20, 184, 166, 0) 28%),
+        var(--bg);
       color: var(--text);
       min-height: 100vh;
       line-height: 1.6;
@@ -48,7 +54,7 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      background: radial-gradient(ellipse at 50% 0%, rgba(124,106,247,0.15) 0%, transparent 60%);
+      background: radial-gradient(ellipse at 50% 0%, rgba(14,165,163,0.18) 0%, transparent 64%);
       padding: 1rem;
     }
 
@@ -59,7 +65,7 @@
       padding: 2.5rem;
       width: 100%;
       max-width: 400px;
-      box-shadow: var(--card-shadow), 0 0 60px rgba(124,106,247,0.08);
+      box-shadow: var(--card-shadow), 0 0 42px rgba(15,118,110,0.10);
     }
 
     .login-logo {
@@ -85,7 +91,7 @@
       font-size: 1.8rem;
       font-weight: 700;
       letter-spacing: -0.04em;
-      background: linear-gradient(135deg, #fff 0%, var(--accent2) 100%);
+      background: linear-gradient(135deg, #111827 0%, #0f766e 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -153,7 +159,7 @@
 
     .btn-primary:hover {
       transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(124,106,247,0.45);
+      box-shadow: 0 8px 24px rgba(15,118,110,0.34);
     }
 
     .btn-primary:active { transform: translateY(0); }
@@ -211,9 +217,10 @@
 
     /* ===== Navbar ===== */
     .navbar {
-      background: rgba(22, 22, 30, 0.9);
+      background: rgba(255, 255, 255, 0.86);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
+      box-shadow: 0 6px 24px rgba(15, 23, 42, 0.05);
       position: sticky;
       top: 0;
       z-index: 100;
@@ -246,7 +253,7 @@
       font-size: 1.2rem;
       font-weight: 700;
       letter-spacing: -0.04em;
-      background: linear-gradient(135deg, #fff, var(--accent2));
+      background: linear-gradient(135deg, #0f172a, var(--accent2));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -327,7 +334,7 @@
       margin-bottom: 0.75rem;
     }
 
-    .stat-icon.purple { background: rgba(124,106,247,0.15); }
+    .stat-icon.purple { background: rgba(15,118,110,0.15); }
     .stat-icon.green { background: rgba(34,197,94,0.15); }
     .stat-icon.blue { background: rgba(59,130,246,0.15); }
     .stat-icon.amber { background: rgba(245,158,11,0.15); }
@@ -525,7 +532,7 @@
     }
 
     .btn-icon.analytics:hover {
-      background: rgba(124,106,247,0.1);
+      background: rgba(15,118,110,0.10);
       color: var(--accent2);
       border-color: var(--accent);
     }
@@ -812,6 +819,10 @@
       }
 
       .analytics-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .users-layout {
         grid-template-columns: 1fr;
       }
 
@@ -1407,6 +1418,65 @@
     .btn-page:disabled { opacity: 0.35; cursor: not-allowed; }
     .btn-page.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
+    /* ===== Usuarios ===== */
+    .users-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 1rem;
+      align-items: start;
+    }
+    .users-panel {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--card-shadow);
+    }
+    .users-panel .panel-header {
+      padding: 1rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0;
+    }
+    .users-panel .panel-body {
+      padding: 1rem 1.2rem;
+    }
+    .users-table-wrap { overflow-x: auto; }
+    .users-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      padding: 0.2rem 0.55rem;
+      font-size: 0.72rem;
+      color: var(--text2);
+      background: var(--bg3);
+      margin-right: 0.35rem;
+      margin-bottom: 0.35rem;
+      white-space: nowrap;
+    }
+    .users-badge-role-admin { border-color: rgba(15,118,110,0.3); color: #0f766e; background: rgba(15,118,110,0.08); }
+    .users-badge-role-editor { border-color: rgba(37,99,235,0.3); color: #1d4ed8; background: rgba(37,99,235,0.08); }
+    .users-badge-role-viewer { border-color: rgba(100,116,139,0.35); color: #475569; background: rgba(100,116,139,0.08); }
+    .perm-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.45rem;
+      margin-top: 0.5rem;
+    }
+    .perm-item {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.78rem;
+      color: var(--text2);
+    }
+    .perm-item input { accent-color: var(--accent); }
+    .meta-note {
+      font-size: 0.75rem;
+      color: var(--text3);
+      margin-top: 0.4rem;
+    }
+
     /* ===== Utilidades ===== */
     .flex { display: flex; }
     .items-center { align-items: center; }
@@ -1417,7 +1487,7 @@
     .text-muted { color: var(--text2); }
     .text-danger { color: var(--danger); }
     .text-success { color: var(--success); }
-    .font-mono { font-family: 'SF Mono', 'Fira Code', monospace; }
+    .font-mono { font-family: 'IBM Plex Mono', 'Fira Code', monospace; }
     .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   </style>
 </head>
@@ -1461,6 +1531,7 @@
       <div class="nav-tabs">
         <button class="nav-tab active" id="tab-campaigns" onclick="switchSection('campaigns')">Campañas</button>
         <button class="nav-tab" id="tab-general" onclick="switchSection('general')">General</button>
+        <button class="nav-tab" id="tab-users" onclick="switchSection('users')" style="display:none">Usuarios</button>
       </div>
       <div class="nav-actions">
         <div class="nav-user">
@@ -1578,7 +1649,7 @@
         </div>
 
         <!-- Panel de crear link dentro de campaña -->
-        <div class="create-panel" style="margin-bottom:1.25rem">
+        <div class="create-panel" id="campaign-create-panel" style="margin-bottom:1.25rem">
           <div class="panel-header">
             <h2>Acortar URL</h2>
             <button class="advanced-toggle" id="advanced-toggle">
@@ -1676,6 +1747,11 @@
           <div class="stat-value" id="stat-active-links">--</div>
           <div class="stat-label">Links Activos</div>
         </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">&#128101;</div>
+          <div class="stat-value" id="stat-unique-visitors">--</div>
+          <div class="stat-label">Visitantes Unicos</div>
+        </div>
       </div>
       <div class="activity-panel">
         <div class="activity-header">
@@ -1686,7 +1762,78 @@
           <canvas id="activity-chart"></canvas>
         </div>
       </div>
+
+      <div class="activity-panel">
+        <div class="activity-header">
+          <h3>&#128270; Origenes principales</h3>
+          <span class="activity-total" id="sources-total"></span>
+        </div>
+        <div id="top-sources-list" style="display:grid;gap:0.45rem"></div>
+      </div>
     </div><!-- /section-general -->
+
+    <div id="section-users" class="main-content section">
+      <div class="users-layout">
+        <div class="users-panel">
+          <div class="panel-header">
+            <h2>Nuevo usuario</h2>
+          </div>
+          <div class="panel-body">
+            <form id="create-user-form">
+              <div class="form-group">
+                <label for="new-user-username">Username</label>
+                <input type="text" id="new-user-username" placeholder="editor_marketing" required />
+              </div>
+              <div class="form-group">
+                <label for="new-user-password">Contrasena</label>
+                <input type="password" id="new-user-password" placeholder="minimo 8 caracteres" required />
+              </div>
+              <div class="form-group">
+                <label for="new-user-role">Rol</label>
+                <select id="new-user-role">
+                  <option value="viewer">viewer</option>
+                  <option value="editor">editor</option>
+                  <option value="admin">admin</option>
+                </select>
+              </div>
+              <div class="form-group" id="new-user-perms-wrap">
+                <label>Permisos extra</label>
+                <div class="perm-grid" id="new-user-perms-grid"></div>
+                <div class="meta-note">Opcional: agrega permisos puntuales ademas del rol base.</div>
+              </div>
+              <div class="form-group" style="margin-top:0.6rem;margin-bottom:0.85rem;">
+                <label class="perm-item"><input type="checkbox" id="new-user-active" checked /> Usuario activo</label>
+              </div>
+              <button type="submit" class="btn btn-primary btn-full" id="create-user-btn">Crear usuario</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="users-panel">
+          <div class="panel-header">
+            <h2>Usuarios y permisos</h2>
+            <button class="btn btn-ghost btn-sm" id="reset-data-btn" style="color:var(--danger);display:none">Limpiar datos</button>
+          </div>
+          <div class="users-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Usuario</th>
+                  <th>Rol</th>
+                  <th>Estado</th>
+                  <th>Permisos</th>
+                  <th>Ultimo acceso</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="users-tbody">
+                <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">&#128101;</div><p>Cargando usuarios...</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
 
   </div>
 
@@ -1719,6 +1866,10 @@
             <div class="value" id="modal-avg-clicks">--</div>
             <div class="label">Promedio Diario</div>
           </div>
+          <div class="analytics-stat">
+            <div class="value" id="modal-unique-visitors">--</div>
+            <div class="label">Visitantes Unicos</div>
+          </div>
         </div>
 
         <div class="chart-container">
@@ -1728,6 +1879,8 @@
         <div class="referrers-section" id="referrers-section" style="display:none;">
           <h4>Top Referrers</h4>
           <div class="referrer-list" id="referrer-list"></div>
+          <h4 style="margin-top:0.8rem">Top UTM Source</h4>
+          <div class="referrer-list" id="source-list"></div>
         </div>
 
         <!-- Breakdown grid -->
@@ -1781,7 +1934,7 @@
           <div class="form-group">
             <label>Color</label>
             <div class="color-swatches" id="color-swatches"></div>
-            <input type="hidden" id="camp-color" value="#7c6af7" />
+            <input type="hidden" id="camp-color" value="#0f766e" />
           </div>
           <div class="form-group">
             <label for="camp-status">Estado</label>
@@ -1812,9 +1965,21 @@
     // ESTADO GLOBAL
     // ═══════════════════════════════════════════════════════════
     const state = {
-      token: localStorage.getItem('shortr_token') || null,
-      username: localStorage.getItem('shortr_username') || null,
+      token: sessionStorage.getItem('shortr_token') || null,
+      username: sessionStorage.getItem('shortr_username') || null,
+      userId: sessionStorage.getItem('shortr_user_id') ? Number(sessionStorage.getItem('shortr_user_id')) : null,
+      role: sessionStorage.getItem('shortr_role') || null,
+      permissions: (() => {
+        try {
+          const raw = sessionStorage.getItem('shortr_permissions');
+          return raw ? JSON.parse(raw) : [];
+        } catch {
+          return [];
+        }
+      })(),
       links: [],
+      users: [],
+      usersMeta: null,
       analyticsChart: null,
       activityChart: null,
       hourlyChart: null,
@@ -1833,6 +1998,38 @@
     // ═══════════════════════════════════════════════════════════
     // UTILIDADES
     // ═══════════════════════════════════════════════════════════
+
+    function can(permission) {
+      return Array.isArray(state.permissions) && state.permissions.includes(permission);
+    }
+
+    function saveSession() {
+      if (state.token) sessionStorage.setItem('shortr_token', state.token);
+      if (state.username) sessionStorage.setItem('shortr_username', state.username);
+      if (state.userId) sessionStorage.setItem('shortr_user_id', String(state.userId));
+      if (state.role) sessionStorage.setItem('shortr_role', state.role);
+      sessionStorage.setItem('shortr_permissions', JSON.stringify(state.permissions || []));
+    }
+
+    function clearSession() {
+      sessionStorage.removeItem('shortr_token');
+      sessionStorage.removeItem('shortr_username');
+      sessionStorage.removeItem('shortr_user_id');
+      sessionStorage.removeItem('shortr_role');
+      sessionStorage.removeItem('shortr_permissions');
+    }
+
+    function formatRole(role) {
+      if (role === 'admin') return 'Admin';
+      if (role === 'editor') return 'Editor';
+      return 'Viewer';
+    }
+
+    function formatPermissions(list) {
+      if (!Array.isArray(list) || list.length === 0) return '<span class="text-muted">Sin permisos</span>';
+      return list.slice(0, 6).map(p => `<span class="users-badge">${escHtml(p)}</span>`).join('') +
+        (list.length > 6 ? `<span class="users-badge">+${list.length - 6}</span>` : '');
+    }
 
     function toast(message, type = 'info') {
       const container = document.getElementById('toast-container');
@@ -1905,9 +2102,24 @@
     function showApp() {
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('app').style.display = 'block';
-      document.getElementById('nav-username').textContent = state.username || 'admin';
+      document.getElementById('nav-username').textContent = state.username
+        ? `${state.username} (${state.role || 'viewer'})`
+        : 'admin';
       const initial = (state.username || 'A')[0].toUpperCase();
       document.getElementById('nav-avatar').textContent = initial;
+
+      const usersTab = document.getElementById('tab-users');
+      if (can('users:read')) {
+        usersTab.style.display = '';
+      } else {
+        usersTab.style.display = 'none';
+        if (state.currentSection === 'users') state.currentSection = 'campaigns';
+      }
+
+      document.getElementById('campaign-create-panel').style.display = can('links:write') ? '' : 'none';
+      document.getElementById('create-user-form').style.display = can('users:write') ? '' : 'none';
+      document.getElementById('reset-data-btn').style.display = can('users:delete') ? '' : 'none';
+
       loadDashboard();
     }
 
@@ -1919,8 +2131,12 @@
     function logout() {
       state.token = null;
       state.username = null;
-      localStorage.removeItem('shortr_token');
-      localStorage.removeItem('shortr_username');
+      state.userId = null;
+      state.role = null;
+      state.permissions = [];
+      state.users = [];
+      state.usersMeta = null;
+      clearSession();
       showLogin();
     }
 
@@ -1943,9 +2159,11 @@
         });
 
         state.token = data.token;
+        state.userId = data.user_id || null;
         state.username = data.username;
-        localStorage.setItem('shortr_token', data.token);
-        localStorage.setItem('shortr_username', data.username);
+        state.role = data.role || null;
+        state.permissions = Array.isArray(data.permissions) ? data.permissions : [];
+        saveSession();
 
         showApp();
       } catch (err) {
@@ -1966,12 +2184,19 @@
     // ── Secciones ─────────────────────────────────────────────
 
     function switchSection(name) {
+      if (name === 'users' && !can('users:read')) {
+        toast('No tienes permiso para ver usuarios', 'error');
+        return;
+      }
       state.currentSection = name;
       document.getElementById('section-campaigns').classList.toggle('active', name === 'campaigns');
       document.getElementById('section-general').classList.toggle('active', name === 'general');
+      document.getElementById('section-users').classList.toggle('active', name === 'users');
       document.getElementById('tab-campaigns').classList.toggle('active', name === 'campaigns');
       document.getElementById('tab-general').classList.toggle('active', name === 'general');
+      document.getElementById('tab-users').classList.toggle('active', name === 'users');
       if (name === 'general') loadGeneralSection();
+      if (name === 'users') loadUsersSection();
     }
 
     async function loadDashboard() {
@@ -1987,7 +2212,9 @@
         document.getElementById('stat-total-clicks').textContent = formatNumber(data.total_clicks);
         document.getElementById('stat-clicks-today').textContent = formatNumber(data.clicks_today);
         document.getElementById('stat-active-links').textContent = formatNumber(data.active_links);
+        document.getElementById('stat-unique-visitors').textContent = formatNumber(data.unique_visitors || 0);
         if (data.clicks_by_day) renderActivityChart(data.clicks_by_day);
+        renderTopSources(data.top_sources || [], data.top_referrer_hosts || []);
       } catch (err) {
         if (err.message.includes('401') || err.message.includes('Token')) logout();
       }
@@ -2025,8 +2252,8 @@
 
       // Gradiente vertical
       const gradient = ctx.createLinearGradient(0, 0, 0, 72);
-      gradient.addColorStop(0, 'rgba(124, 106, 247, 0.85)');
-      gradient.addColorStop(1, 'rgba(124, 106, 247, 0.25)');
+      gradient.addColorStop(0, 'rgba(15, 118, 110, 0.85)');
+      gradient.addColorStop(1, 'rgba(15, 118, 110, 0.24)');
 
       state.activityChart = new Chart(ctx, {
         type: 'bar',
@@ -2036,7 +2263,7 @@
             data: values,
             backgroundColor: values.map(v =>
               v === maxVal && maxVal > 0
-                ? 'rgba(167, 139, 250, 0.95)'
+                ? 'rgba(13, 148, 136, 0.95)'
                 : gradient
             ),
             borderRadius: 3,
@@ -2082,8 +2309,39 @@
       });
     }
 
+    function renderTopSources(sources, hosts) {
+      const total = sources.reduce((sum, s) => sum + s.count, 0);
+      const list = document.getElementById('top-sources-list');
+      const totalEl = document.getElementById('sources-total');
+      totalEl.textContent = total > 0 ? `${formatNumber(total)} clicks medidos` : 'Sin datos';
+
+      if (!sources.length && !hosts.length) {
+        list.innerHTML = '<div class="text-muted text-sm">Aun no hay datos de origen.</div>';
+        return;
+      }
+
+      const rows = [];
+      sources.slice(0, 4).forEach(item => {
+        const pct = total > 0 ? Math.round((item.count / total) * 100) : 0;
+        rows.push(`<div class="breakdown-item"><span class="breakdown-label">UTM: ${escHtml(item.source)}</span><div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:${pct}%"></div></div><span class="breakdown-count">${item.count}</span><span class="breakdown-pct">${pct}%</span></div>`);
+      });
+
+      const hostTotal = hosts.reduce((sum, h) => sum + h.count, 0);
+      hosts.slice(0, 3).forEach(item => {
+        const pct = hostTotal > 0 ? Math.round((item.count / hostTotal) * 100) : 0;
+        rows.push(`<div class="breakdown-item"><span class="breakdown-label">Referrer: ${escHtml(item.host)}</span><div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:${pct}%"></div></div><span class="breakdown-count">${item.count}</span><span class="breakdown-pct">${pct}%</span></div>`);
+      });
+
+      list.innerHTML = rows.join('');
+    }
+
     async function loadLinks() {
       const tbody = document.getElementById('links-tbody');
+
+      if (!can('links:read')) {
+        tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">&#9940;</div><p>No tienes permiso para ver links.</p></div></td></tr>';
+        return;
+      }
 
       try {
         const params = new URLSearchParams({ page: state.page, limit: state.limit });
@@ -2106,7 +2364,7 @@
           <tr><td colspan="6">
             <div class="empty-state">
               <div class="empty-icon">&#9888;</div>
-              <p style="color:var(--danger)">Error cargando links: ${err.message}</p>
+              <p style="color:var(--danger)">Error cargando links: ${escHtml(err.message)}</p>
             </div>
           </td></tr>
         `;
@@ -2140,6 +2398,19 @@
           ? `<br><span class="text-xs text-muted">Expira: ${formatDate(link.expires_at)}</span>`
           : '';
 
+        const actions = [];
+        actions.push(`<button class="btn-icon" title="Copiar URL corta" onclick="copyToClipboard('${escHtml(link.short_url)}', this)">&#128203;</button>`);
+
+        if (can('analytics:read')) {
+          actions.push(`<button class="btn-icon analytics" title="Ver analytics" onclick="openAnalytics('${escHtml(link.code)}')">&#128200;</button>`);
+        }
+        if (can('links:toggle')) {
+          actions.push(`<button class="btn-icon" title="${link.is_active ? 'Desactivar link' : 'Activar link'}" style="color: ${link.is_active ? 'var(--warning)' : 'var(--success)'}" onclick="toggleLink(${link.id})">${link.is_active ? '&#9646;&#9646;' : '&#9654;'}</button>`);
+        }
+        if (can('links:delete')) {
+          actions.push(`<button class="btn-icon danger" title="Eliminar link" onclick="deleteLink(${link.id}, '${escHtml(link.code)}')">&#128465;</button>`);
+        }
+
         return `
           <tr>
             <td>
@@ -2161,29 +2432,7 @@
               <span class="text-sm text-muted">${formatDate(link.created_at)}</span>
             </td>
             <td>
-              <div class="actions-cell">
-                <button
-                  class="btn-icon"
-                  title="Copiar URL corta"
-                  onclick="copyToClipboard('${escHtml(link.short_url)}', this)"
-                >&#128203;</button>
-                <button
-                  class="btn-icon analytics"
-                  title="Ver analytics"
-                  onclick="openAnalytics('${escHtml(link.code)}')"
-                >&#128200;</button>
-                <button
-                  class="btn-icon"
-                  title="${link.is_active ? 'Desactivar link' : 'Activar link'}"
-                  style="color: ${link.is_active ? 'var(--warning)' : 'var(--success)'}"
-                  onclick="toggleLink(${link.id})"
-                >${link.is_active ? '&#9646;&#9646;' : '&#9654;'}</button>
-                <button
-                  class="btn-icon danger"
-                  title="Eliminar link"
-                  onclick="deleteLink(${link.id}, '${escHtml(link.code)}')"
-                >&#128465;</button>
-              </div>
+              <div class="actions-cell">${actions.join('')}</div>
             </td>
           </tr>
         `;
@@ -2210,6 +2459,10 @@
 
     document.getElementById('create-form').addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!can('links:write')) {
+        toast('No tienes permiso para crear links', 'error');
+        return;
+      }
       const btn = document.getElementById('create-btn');
       const url = document.getElementById('new-url').value.trim();
       const alias = document.getElementById('new-alias').value.trim();
@@ -2263,8 +2516,8 @@
     // ═══════════════════════════════════════════════════════════
 
     const CAMPAIGN_COLORS = [
-      '#7c6af7','#3b82f6','#10b981','#f59e0b',
-      '#ef4444','#ec4899','#8b5cf6','#06b6d4','#84cc16','#f97316'
+      '#0f766e', '#0ea5a3', '#2563eb', '#059669',
+      '#d97706', '#dc2626', '#475569', '#0284c7', '#16a34a', '#9a3412'
     ];
 
     async function loadCampaigns() {
@@ -2331,7 +2584,9 @@
         </div>`;
       }).join('');
 
-      html += `<div class="campaign-card-add" onclick="openCreateCampaignModal()"><span class="add-icon">&#43;</span><span>Nueva campaña</span></div>`;
+      if (can('campaigns:write')) {
+        html += `<div class="campaign-card-add" onclick="openCreateCampaignModal()"><span class="add-icon">&#43;</span><span>Nueva campaña</span></div>`;
+      }
       grid.innerHTML = html;
     }
 
@@ -2358,6 +2613,8 @@
       // Botones de acción
       document.getElementById('cd-edit-btn').onclick = () => openEditCampaignModal(campaign);
       document.getElementById('cd-delete-btn').onclick = () => deleteCampaign(campaign.id, campaign.name);
+      document.getElementById('cd-edit-btn').style.display = can('campaigns:write') ? '' : 'none';
+      document.getElementById('cd-delete-btn').style.display = can('campaigns:delete') ? '' : 'none';
 
       // Reiniciar chart inline
       if (state.cdChart) { state.cdChart.destroy(); state.cdChart = null; }
@@ -2528,6 +2785,10 @@
     // ── Crear campaña ──────────────────────────────────────────
 
     function openCreateCampaignModal() {
+      if (!can('campaigns:write')) {
+        toast('No tienes permiso para crear campañas', 'error');
+        return;
+      }
       document.getElementById('camp-name').value = '';
       document.getElementById('camp-desc').value = '';
       document.getElementById('camp-color').value = CAMPAIGN_COLORS[0];
@@ -2545,6 +2806,10 @@
     }
 
     function openEditCampaignModal(campaign) {
+      if (!can('campaigns:write')) {
+        toast('No tienes permiso para editar campañas', 'error');
+        return;
+      }
       document.getElementById('camp-name').value = campaign.name;
       document.getElementById('camp-desc').value = campaign.description || '';
       document.getElementById('camp-color').value = campaign.color;
@@ -2637,6 +2902,10 @@
     });
 
     async function deleteCampaign(id, name) {
+      if (!can('campaigns:delete')) {
+        toast('No tienes permiso para eliminar campañas', 'error');
+        return;
+      }
       if (!confirm(`¿Eliminar la campaña "${name}"?\nLos links quedarán sin campaña.`)) return;
       try {
         await apiFetch(`/api/campaigns/${id}`, { method: 'DELETE' });
@@ -2647,6 +2916,208 @@
         toast(err.message, 'error');
       }
     }
+
+    // ═══════════════════════════════════════════════════════════
+    // USUARIOS Y PERMISOS
+    // ═══════════════════════════════════════════════════════════
+
+    function selectedPermissionsFromCreateForm() {
+      const selected = [];
+      document.querySelectorAll('#new-user-perms-grid input[type="checkbox"]:checked').forEach(input => {
+        selected.push(input.value);
+      });
+      return selected;
+    }
+
+    function renderCreatePermissionsGrid() {
+      const wrap = document.getElementById('new-user-perms-wrap');
+      if (!can('users:permissions')) {
+        wrap.style.display = 'none';
+        return;
+      }
+
+      wrap.style.display = '';
+      const grid = document.getElementById('new-user-perms-grid');
+      const all = state.usersMeta && Array.isArray(state.usersMeta.all_permissions)
+        ? state.usersMeta.all_permissions
+        : [];
+      if (!all.length) {
+        grid.innerHTML = '<div class="text-muted text-sm">No hay permisos disponibles.</div>';
+        return;
+      }
+
+      grid.innerHTML = all.map(p => `<label class="perm-item"><input type="checkbox" value="${escHtml(p)}" /> ${escHtml(p)}</label>`).join('');
+    }
+
+    async function loadUsersSection() {
+      const tbody = document.getElementById('users-tbody');
+      if (!can('users:read')) {
+        tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">&#9940;</div><p>No tienes permiso para ver usuarios.</p></div></td></tr>';
+        return;
+      }
+
+      try {
+        if (!state.usersMeta) {
+          state.usersMeta = await apiFetch('/api/users/meta');
+          renderCreatePermissionsGrid();
+        }
+
+        const data = await apiFetch('/api/users');
+        state.users = data.users || [];
+        renderUsersTable();
+      } catch (err) {
+        if (err.message.includes('401') || err.message.includes('Token')) {
+          logout();
+          return;
+        }
+        tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">&#9888;</div><p>${escHtml(err.message)}</p></div></td></tr>`;
+      }
+    }
+
+    function renderUsersTable() {
+      const tbody = document.getElementById('users-tbody');
+      if (!state.users.length) {
+        tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">&#128101;</div><p>No hay usuarios creados.</p></div></td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = state.users.map(user => {
+        const roleClass = `users-badge-role-${user.role}`;
+        const stateBadge = user.is_active
+          ? '<span class="badge badge-success">Activo</span>'
+          : '<span class="badge badge-danger">Inactivo</span>';
+
+        const actions = [];
+        if (can('users:write')) {
+          actions.push(`<button class="btn btn-ghost btn-sm" onclick="editUser(${user.id})">Editar</button>`);
+          actions.push(`<button class="btn btn-ghost btn-sm" onclick="resetUserPassword(${user.id}, '${escHtml(user.username)}')">Password</button>`);
+        }
+        if (can('users:delete') && user.id !== state.userId) {
+          actions.push(`<button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id}, '${escHtml(user.username)}')">Eliminar</button>`);
+        }
+
+        return `
+          <tr>
+            <td><span class="font-mono">${escHtml(user.username)}</span></td>
+            <td><span class="users-badge ${roleClass}">${escHtml(formatRole(user.role))}</span></td>
+            <td>${stateBadge}</td>
+            <td>${formatPermissions(user.permissions)}</td>
+            <td><span class="text-muted text-sm">${user.last_login_at ? escHtml(formatDateTime(user.last_login_at)) : 'Nunca'}</span></td>
+            <td><div class="actions-cell">${actions.join('')}</div></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function editUser(userId) {
+      const user = state.users.find(u => u.id === userId);
+      if (!user) return;
+
+      const username = prompt('Username:', user.username);
+      if (username === null) return;
+      const role = prompt('Rol (admin/editor/viewer):', user.role);
+      if (role === null) return;
+      const activeRaw = prompt('Estado (active/inactive):', user.is_active ? 'active' : 'inactive');
+      if (activeRaw === null) return;
+      const isActive = !/^in/i.test(activeRaw.trim());
+
+      let customPermissions = user.custom_permissions || [];
+      if (can('users:permissions')) {
+        const permsRaw = prompt('Permisos extra separados por coma (opcional):', (user.custom_permissions || []).join(','));
+        if (permsRaw === null) return;
+        customPermissions = permsRaw.split(',').map(p => p.trim()).filter(Boolean);
+      }
+
+      try {
+        await apiFetch(`/api/users/${userId}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ username, role, is_active: isActive, permissions: customPermissions })
+        });
+        toast('Usuario actualizado', 'success');
+        await loadUsersSection();
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    }
+
+    async function resetUserPassword(userId, username) {
+      const nextPassword = prompt(`Nueva contrasena para ${username} (min 8):`);
+      if (nextPassword === null) return;
+
+      try {
+        await apiFetch(`/api/users/${userId}/password`, {
+          method: 'PATCH',
+          body: JSON.stringify({ password: nextPassword })
+        });
+        toast('Contrasena actualizada', 'success');
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    }
+
+    async function deleteUser(userId, username) {
+      if (!confirm(`¿Eliminar el usuario "${username}"? Esta accion no se puede deshacer.`)) return;
+      try {
+        await apiFetch(`/api/users/${userId}`, { method: 'DELETE' });
+        toast('Usuario eliminado', 'success');
+        await loadUsersSection();
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    }
+
+    document.getElementById('create-user-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('create-user-btn');
+      const username = document.getElementById('new-user-username').value.trim();
+      const password = document.getElementById('new-user-password').value;
+      const role = document.getElementById('new-user-role').value;
+      const is_active = document.getElementById('new-user-active').checked;
+      const permissions = selectedPermissionsFromCreateForm();
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Creando...';
+      try {
+        await apiFetch('/api/users', {
+          method: 'POST',
+          body: JSON.stringify({ username, password, role, is_active, permissions })
+        });
+        document.getElementById('new-user-username').value = '';
+        document.getElementById('new-user-password').value = '';
+        document.getElementById('new-user-role').value = 'viewer';
+        document.getElementById('new-user-active').checked = true;
+        document.querySelectorAll('#new-user-perms-grid input[type="checkbox"]').forEach(el => { el.checked = false; });
+        toast('Usuario creado correctamente', 'success');
+        await loadUsersSection();
+      } catch (err) {
+        toast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Crear usuario';
+      }
+    });
+
+    document.getElementById('reset-data-btn').addEventListener('click', async () => {
+      if (!can('users:delete')) {
+        toast('No tienes permiso para limpiar datos', 'error');
+        return;
+      }
+
+      const confirmText = prompt('Esta accion elimina clicks, links, campanas y usuarios no-admin. Escribe RESET para confirmar:');
+      if (confirmText !== 'RESET') return;
+
+      try {
+        await apiFetch('/api/admin/reset-data', {
+          method: 'POST',
+          body: JSON.stringify({ confirm: 'RESET' })
+        });
+        toast('Datos limpiados correctamente', 'success');
+        state.currentCampaign = null;
+        await Promise.all([loadCampaigns(), loadGeneralSection(), loadUsersSection()]);
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    });
 
     // ═══════════════════════════════════════════════════════════
     // PAGINACIÓN
@@ -2789,8 +3260,8 @@
             datasets: [{
               label: 'Clicks',
               data: values,
-              backgroundColor: 'rgba(124, 106, 247, 0.5)',
-              borderColor: 'rgba(124, 106, 247, 0.9)',
+              backgroundColor: 'rgba(15, 118, 110, 0.42)',
+              borderColor: 'rgba(15, 118, 110, 0.95)',
               borderWidth: 1,
               borderRadius: 4,
             }]
@@ -2938,7 +3409,7 @@
           datasets: [{
             data: values,
             backgroundColor: values.map(v =>
-              v === maxVal && maxVal > 0 ? 'rgba(167,139,250,0.9)' : 'rgba(124,106,247,0.45)'
+              v === maxVal && maxVal > 0 ? 'rgba(13,148,136,0.9)' : 'rgba(15,118,110,0.44)'
             ),
             borderRadius: 2,
             borderSkipped: false,

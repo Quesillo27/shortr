@@ -8,15 +8,16 @@
 
 const express = require('express');
 const router = express.Router();
-const db = require('../db/database');
+const { db } = require('../db/database');
 const { verifyToken } = require('../middleware/auth');
+const { requirePermission } = require('../middleware/rbac');
 
 const VALID_STATUSES = new Set(['active', 'paused', 'archived']);
 
 /**
  * GET /api/campaigns
  */
-router.get('/', verifyToken, (req, res) => {
+router.get('/', verifyToken, requirePermission('campaigns:read'), (req, res) => {
   try {
     const campaigns = db.prepare(`
       SELECT
@@ -49,7 +50,7 @@ router.get('/', verifyToken, (req, res) => {
  * POST /api/campaigns
  * Body: { name, description?, color?, status?, goal_clicks? }
  */
-router.post('/', verifyToken, (req, res) => {
+router.post('/', verifyToken, requirePermission('campaigns:write'), (req, res) => {
   const { name, description, color, status, goal_clicks } = req.body;
 
   if (!name || !name.trim()) {
@@ -59,7 +60,7 @@ router.post('/', verifyToken, (req, res) => {
     return res.status(400).json({ error: 'El nombre no puede exceder 60 caracteres' });
   }
 
-  const validColor  = /^#[0-9a-fA-F]{6}$/.test(color) ? color : '#7c6af7';
+  const validColor  = /^#[0-9a-fA-F]{6}$/.test(color) ? color : '#0f766e';
   const validStatus = VALID_STATUSES.has(status) ? status : 'active';
   const validGoal   = goal_clicks && Number(goal_clicks) > 0 ? Number(goal_clicks) : null;
 
@@ -92,7 +93,7 @@ router.post('/', verifyToken, (req, res) => {
  * PATCH /api/campaigns/:id
  * Body: { name?, description?, color?, status?, goal_clicks? }
  */
-router.patch('/:id', verifyToken, (req, res) => {
+router.patch('/:id', verifyToken, requirePermission('campaigns:write'), (req, res) => {
   const { id } = req.params;
   if (!id || isNaN(Number(id))) return res.status(400).json({ error: 'ID inválido' });
 
@@ -125,7 +126,7 @@ router.patch('/:id', verifyToken, (req, res) => {
  * DELETE /api/campaigns/:id
  * Los links de esa campaña quedan con campaign_id = NULL
  */
-router.delete('/:id', verifyToken, (req, res) => {
+router.delete('/:id', verifyToken, requirePermission('campaigns:delete'), (req, res) => {
   const { id } = req.params;
   if (!id || isNaN(Number(id))) return res.status(400).json({ error: 'ID inválido' });
 

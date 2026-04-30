@@ -6,17 +6,26 @@
 
 const express = require('express');
 const router = express.Router();
-const db = require('../db/database');
+const { db } = require('../db/database');
 const { verifyToken } = require('../middleware/auth');
+const { requirePermission } = require('../middleware/rbac');
+const { analyticsLimiter } = require('../middleware/rateLimit');
+
+router.use(verifyToken, analyticsLimiter, requirePermission('analytics:read'));
 
 /**
  * GET /api/analytics/summary
  * Devuelve estadísticas globales: total links, total clicks, clicks hoy.
  */
-router.get('/summary', verifyToken, (req, res) => {
+router.get('/summary', (req, res) => {
   try {
     const totalLinks = db.prepare('SELECT COUNT(*) AS count FROM links WHERE is_active = 1').get();
     const totalClicks = db.prepare('SELECT COUNT(*) AS count FROM clicks').get();
+    const uniqueVisitors = db.prepare(`
+      SELECT COUNT(DISTINCT COALESCE(visitor_hash, ip_hash)) AS count
+      FROM clicks
+      WHERE COALESCE(visitor_hash, ip_hash) IS NOT NULL
+    `).get();
     const clicksToday = db.prepare(`
       SELECT COUNT(*) AS count FROM clicks
       WHERE date(clicked_at) = date('now')
@@ -39,6 +48,22 @@ router.get('/summary', verifyToken, (req, res) => {
       GROUP BY l.id
       ORDER BY clicks DESC
       LIMIT 5
+    `).all();
+
+    const topSources = db.prepare(`
+      SELECT COALESCE(utm_source, 'sin-utm') AS source, COUNT(*) AS count
+      FROM clicks
+      GROUP BY source
+      ORDER BY count DESC
+      LIMIT 6
+    `).all();
+
+    const topReferrerHosts = db.prepare(`
+      SELECT COALESCE(referrer_host, 'directo') AS host, COUNT(*) AS count
+      FROM clicks
+      GROUP BY host
+      ORDER BY count DESC
+      LIMIT 6
     `).all();
 
     // Clicks por día — últimos 14 días (todos los links)
@@ -65,9 +90,12 @@ router.get('/summary', verifyToken, (req, res) => {
     res.json({
       total_links: totalLinks.count,
       total_clicks: totalClicks.count,
+      unique_visitors: uniqueVisitors.count,
       clicks_today: clicksToday.count,
       active_links: activeLinks.count,
       top_links: topLinks,
+      top_sources: topSources,
+      top_referrer_hosts: topReferrerHosts,
       clicks_by_day
     });
   } catch (err) {
@@ -84,7 +112,7 @@ router.get('/summary', verifyToken, (req, res) => {
  * - Referrers principales
  * - User agents (mobile vs desktop)
  */
-router.get('/:code', verifyToken, (req, res) => {
+router.get('/:code', (req, res) => {
   const { code } = req.params;
 
   try {
@@ -111,6 +139,11 @@ router.get('/:code', verifyToken, (req, res) => {
 
     // Total de clicks
     const totalClicks = db.prepare('SELECT COUNT(*) AS count FROM clicks WHERE link_id = ?').get(link.id);
+    const uniqueVisitors = db.prepare(`
+      SELECT COUNT(DISTINCT COALESCE(visitor_hash, ip_hash)) AS count
+      FROM clicks
+      WHERE link_id = ? AND COALESCE(visitor_hash, ip_hash) IS NOT NULL
+    `).get(link.id);
 
     // Top referrers
     const topReferrers = db.prepare(`
@@ -122,6 +155,24 @@ router.get('/:code', verifyToken, (req, res) => {
       GROUP BY referrer
       ORDER BY count DESC
       LIMIT 5
+    `).all(link.id);
+
+    const utmSourceBreakdown = db.prepare(`
+      SELECT COALESCE(utm_source, 'sin-utm') AS source, COUNT(*) AS count
+      FROM clicks
+      WHERE link_id = ?
+      GROUP BY source
+      ORDER BY count DESC
+      LIMIT 8
+    `).all(link.id);
+
+    const referrerHostBreakdown = db.prepare(`
+      SELECT COALESCE(referrer_host, 'directo') AS host, COUNT(*) AS count
+      FROM clicks
+      WHERE link_id = ?
+      GROUP BY host
+      ORDER BY count DESC
+      LIMIT 8
     `).all(link.id);
 
     // Clicks de hoy
@@ -196,9 +247,12 @@ router.get('/:code', verifyToken, (req, res) => {
         is_expired: link.expires_at ? new Date(link.expires_at) < new Date() : false
       },
       total_clicks: totalClicks.count,
+      unique_visitors: uniqueVisitors.count,
       clicks_today: clicksToday.count,
       clicks_by_day: days,
       top_referrers: topReferrers,
+      utm_source_breakdown: utmSourceBreakdown,
+      referrer_host_breakdown: referrerHostBreakdown,
       device_breakdown: deviceBreakdown,
       browser_breakdown: browserBreakdown,
       os_breakdown: osBreakdown,
@@ -215,7 +269,7 @@ router.get('/:code', verifyToken, (req, res) => {
  * GET /api/analytics/campaign/:id?period=7|30|90|all
  * Dashboard completo de una campaña con período dinámico, comparación vs período anterior e insights.
  */
-router.get('/campaign/:id', verifyToken, (req, res) => {
+router.get('/campaign/:id', (req, res) => {
   const { id } = req.params;
   if (!id || isNaN(Number(id))) return res.status(400).json({ error: 'ID inválido' });
 
@@ -237,6 +291,7 @@ router.get('/campaign/:id', verifyToken, (req, res) => {
         COUNT(DISTINCT l.id) AS total_links,
         COUNT(DISTINCT CASE WHEN l.is_active=1 AND (l.expires_at IS NULL OR l.expires_at > datetime('now')) THEN l.id END) AS active_links,
         COUNT(ck.id)         AS total_clicks,
+        COUNT(DISTINCT COALESCE(ck.visitor_hash, ck.ip_hash)) AS unique_visitors,
         COUNT(CASE WHEN date(ck.clicked_at) = date('now') THEN 1 END) AS clicks_today
       FROM links l
       LEFT JOIN clicks ck ON ck.link_id = l.id
@@ -361,6 +416,13 @@ router.get('/campaign/:id', verifyToken, (req, res) => {
       WHERE l.campaign_id = ? ${periodClause} GROUP BY ck.country_code ORDER BY count DESC LIMIT 8
     `).all(Number(id));
 
+    const sourceBreakdown = db.prepare(`
+      SELECT COALESCE(ck.utm_source, 'sin-utm') AS source, COUNT(*) AS count
+      FROM clicks ck JOIN links l ON ck.link_id = l.id
+      WHERE l.campaign_id = ? ${periodClause}
+      GROUP BY source ORDER BY count DESC LIMIT 8
+    `).all(Number(id));
+
     res.json({
       campaign,
       ...stats,
@@ -373,7 +435,8 @@ router.get('/campaign/:id', verifyToken, (req, res) => {
       device_breakdown: deviceBreakdown,
       browser_breakdown: browserBreakdown,
       os_breakdown: osBreakdown,
-      country_breakdown: countryBreakdown
+      country_breakdown: countryBreakdown,
+      source_breakdown: sourceBreakdown
     });
   } catch (err) {
     console.error('Error en analytics de campaña:', err.message);

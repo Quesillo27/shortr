@@ -1,35 +1,54 @@
 /**
- * rateLimit.js — Configuración de rate limiting con express-rate-limit
- * Protege endpoints críticos contra abuso y ataques de fuerza bruta.
+ * rateLimit.js — Rate limits por tipo de endpoint.
  */
 
 const rateLimit = require('express-rate-limit');
 
-// Límite general para la API
+const baseOptions = {
+  standardHeaders: true,
+  legacyHeaders: false
+};
+
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Demasiadas solicitudes. Intenta de nuevo en 15 minutos.' }
-});
-
-// Límite estricto para el login (prevenir fuerza bruta)
-const loginLimiter = rateLimit({
+  ...baseOptions,
   windowMs: 15 * 60 * 1000,
-  max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Demasiados intentos de login. Intenta de nuevo en 15 minutos.' }
+  max: Number(process.env.RATE_LIMIT_API_MAX || 180),
+  message: { error: 'Demasiadas solicitudes a la API. Intenta nuevamente en unos minutos.' }
 });
 
-// Límite para los redirects (más permisivo, son clics reales)
+const loginLimiter = rateLimit({
+  ...baseOptions,
+  windowMs: 15 * 60 * 1000,
+  max: Number(process.env.RATE_LIMIT_LOGIN_MAX || 12),
+  skipSuccessfulRequests: true,
+  message: { error: 'Demasiados intentos de inicio de sesion. Espera 15 minutos.' }
+});
+
 const redirectLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minuto
-  max: 120,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Demasiados redirects. Intenta de nuevo en un momento.' }
+  ...baseOptions,
+  windowMs: 60 * 1000,
+  max: Number(process.env.RATE_LIMIT_REDIRECT_MAX || 200),
+  message: { error: 'Demasiados redirects desde este origen. Intenta de nuevo en un momento.' }
 });
 
-module.exports = { apiLimiter, loginLimiter, redirectLimiter };
+const usersLimiter = rateLimit({
+  ...baseOptions,
+  windowMs: 10 * 60 * 1000,
+  max: Number(process.env.RATE_LIMIT_USERS_MAX || 60),
+  message: { error: 'Demasiadas operaciones de usuarios. Intenta nuevamente en 10 minutos.' }
+});
+
+const analyticsLimiter = rateLimit({
+  ...baseOptions,
+  windowMs: 5 * 60 * 1000,
+  max: Number(process.env.RATE_LIMIT_ANALYTICS_MAX || 120),
+  message: { error: 'Demasiadas consultas de analytics. Intenta de nuevo pronto.' }
+});
+
+module.exports = {
+  apiLimiter,
+  loginLimiter,
+  redirectLimiter,
+  usersLimiter,
+  analyticsLimiter
+};

@@ -1,165 +1,119 @@
-# Shortr — URL Shortener con Analytics
+# Shortr - URL Shortener con Analytics y RBAC
 
-Shortr es un acortador de URLs profesional, self-hosted, con panel de analytics integrado. Construido con Node.js, SQLite y Vanilla JS. No requiere base de datos externa ni servicios de terceros.
+Shortr es un acortador de URLs self-hosted con panel administrativo, captura de analytics enriquecidos y control de acceso por roles/permisos.
 
-## Caracteristicas
+## Caracteristicas principales
 
-- Acortar URLs con alias personalizado y fecha de expiracion
-- Panel de analytics con grafica de clicks por dia (ultimos 30 dias)
-- Autenticacion JWT (panel admin protegido)
-- Rate limiting en todos los endpoints
-- Hash SHA-256 de IPs para privacidad
-- Tracking de referrers y user agents
-- Dark theme moderno y responsive
-- Docker listo para produccion
-- SQLite embebido — zero dependencias externas
+- Acortamiento de URLs con alias personalizado y expiracion
+- Campanas con estado, color, meta de clicks e insights
+- Analytics por link/campana con desglose por pais, dispositivo, navegador y hora
+- Captura de fuentes UTM (`utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`)
+- Referrer host normalizado y conteo de visitantes unicos aproximados
+- Multiusuario con RBAC (admin/editor/viewer) y permisos adicionales
+- Hardening basico: headers de seguridad, rate limits por tipo de endpoint, JWT con issuer/audience
+- Endpoint administrativo para limpiar datos y dejar el sistema listo para reutilizar
 
-## Instalacion
+## Requisitos
 
-### Opcion 1: Docker (recomendado)
-
-```bash
-# 1. Clonar el repositorio
-git clone https://github.com/Quesillo27/shortr.git
-cd shortr
-
-# 2. Editar variables en docker-compose.yml
-#    Cambia JWT_SECRET, ADMIN_PASSWORD y BASE_URL
-
-# 3. Levantar
-docker-compose up -d
-
-# 4. Acceder en http://localhost:3000
-```
-
-### Opcion 2: npm (produccion)
-
-```bash
-git clone https://github.com/Quesillo27/shortr.git
-cd shortr
-npm install --omit=dev
-
-# Variables de entorno requeridas:
-export JWT_SECRET=tu-secreto-seguro
-export ADMIN_PASSWORD=tu-password
-
-# Opcionales:
-export ADMIN_USER=admin         # default: admin
-export PORT=3000                # default: 3000
-export BASE_URL=https://tu.dominio.com
-
-npm start
-```
-
-### Opcion 3: Desarrollo local
-
-```bash
-git clone https://github.com/Quesillo27/shortr.git
-cd shortr
-npm install
-
-JWT_SECRET=dev-secret ADMIN_PASSWORD=admin123 npm run dev
-```
+- Node.js 18+
+- Variables de entorno configuradas (ver abajo)
 
 ## Variables de entorno
 
 | Variable | Requerida | Default | Descripcion |
 |---|---|---|---|
-| `JWT_SECRET` | Si | — | Secreto para firmar tokens JWT. Debe ser largo y aleatorio. |
-| `ADMIN_PASSWORD` | Si | — | Contrasena del usuario administrador. |
-| `ADMIN_USER` | No | `admin` | Nombre de usuario del administrador. |
-| `PORT` | No | `3000` | Puerto en el que escucha el servidor. |
-| `BASE_URL` | No | `http://localhost:3000` | URL base publica para construir URLs cortas. |
-| `ALLOWED_ORIGINS` | No | `*` | Origenes CORS permitidos, separados por coma. |
+| `JWT_SECRET` | Si | - | Secreto para firmar JWT |
+| `ADMIN_USER` | Solo bootstrap | `admin` | Usuario admin inicial si no existen usuarios |
+| `ADMIN_PASSWORD` | Solo bootstrap | - | Password admin inicial (minimo 8) si no existen usuarios |
+| `JWT_EXPIRES_IN` | No | `12h` | Expiracion del token |
+| `JWT_ISSUER` | No | `shortr` | Issuer JWT |
+| `JWT_AUDIENCE` | No | `shortr-admin` | Audience JWT |
+| `PORT` | No | `3000` | Puerto de la aplicacion |
+| `BASE_URL` | No | `http://localhost:3000` | URL publica base para links cortos |
+| `ALLOWED_ORIGINS` | No | vacio | Lista de origenes CORS separados por coma |
+| `RATE_LIMIT_API_MAX` | No | `180` | Max requests API por ventana |
+| `RATE_LIMIT_LOGIN_MAX` | No | `12` | Max intentos login por ventana |
+| `RATE_LIMIT_REDIRECT_MAX` | No | `200` | Max redirects por minuto |
+| `RATE_LIMIT_USERS_MAX` | No | `60` | Max operaciones usuarios por ventana |
+| `RATE_LIMIT_ANALYTICS_MAX` | No | `120` | Max consultas analytics por ventana |
 
-## Endpoints API
+## Roles y permisos
 
-### Autenticacion
+### Roles base
 
-```bash
-# Login — obtener token JWT
-curl -X POST http://localhost:3000/api/auth/login \
-  -H 'Content-Type: application/json' \
-  -d '{"username":"admin","password":"tu-password"}'
-# Respuesta: { "token": "eyJ...", "expiresIn": 86400, "username": "admin" }
-```
+- `admin`: control total
+- `editor`: gestion de campanas/links + lectura analytics
+- `viewer`: solo lectura de dashboard/campanas/links/analytics
+
+### Permisos (granulares)
+
+- `dashboard:view`
+- `campaigns:read`, `campaigns:write`, `campaigns:delete`
+- `links:read`, `links:write`, `links:toggle`, `links:delete`
+- `analytics:read`
+- `users:read`, `users:write`, `users:delete`, `users:permissions`
+
+## Endpoints principales
+
+### Auth
+
+- `POST /api/auth/login`
 
 ### Links
 
-```bash
-# Crear link corto
-curl -X POST http://localhost:3000/api/links \
-  -H 'Authorization: Bearer <token>' \
-  -H 'Content-Type: application/json' \
-  -d '{"url":"https://ejemplo.com/url-larga", "alias":"mi-link"}'
+- `POST /api/links`
+- `GET /api/links`
+- `PATCH /api/links/:id/toggle`
+- `DELETE /api/links/:id`
 
-# Crear con expiracion
-curl -X POST http://localhost:3000/api/links \
-  -H 'Authorization: Bearer <token>' \
-  -H 'Content-Type: application/json' \
-  -d '{"url":"https://ejemplo.com", "expiresAt":"2025-12-31T23:59:59Z"}'
+### Campanas
 
-# Listar todos los links
-curl http://localhost:3000/api/links \
-  -H 'Authorization: Bearer <token>'
-
-# Eliminar link
-curl -X DELETE http://localhost:3000/api/links/1 \
-  -H 'Authorization: Bearer <token>'
-```
+- `GET /api/campaigns`
+- `POST /api/campaigns`
+- `PATCH /api/campaigns/:id`
+- `DELETE /api/campaigns/:id`
 
 ### Analytics
 
+- `GET /api/analytics/summary`
+- `GET /api/analytics/:code`
+- `GET /api/analytics/campaign/:id?period=7|30|90|all`
+
+### Usuarios y permisos
+
+- `GET /api/users/meta`
+- `GET /api/users`
+- `POST /api/users`
+- `PATCH /api/users/:id`
+- `PATCH /api/users/:id/password`
+- `DELETE /api/users/:id`
+
+### Operacion
+
+- `GET /health`
+- `POST /api/admin/reset-data` (requiere permiso `users:delete` y body `{ "confirm": "RESET" }`)
+
+## Desarrollo local
+
 ```bash
-# Estadisticas globales
-curl http://localhost:3000/api/analytics/summary \
-  -H 'Authorization: Bearer <token>'
-
-# Analytics de un link especifico
-curl http://localhost:3000/api/analytics/mi-link \
-  -H 'Authorization: Bearer <token>'
+npm install
+JWT_SECRET=dev-secret ADMIN_PASSWORD=admin123 npm run dev
 ```
 
-### Redirect
+## Docker
 
-```bash
-# Acceder al link corto (redirige automaticamente)
-curl -L http://localhost:3000/mi-link
-```
+El `docker-compose.yml` incluye volumen persistente para SQLite y `healthcheck` sobre `/health`.
 
-## Arquitectura
+## Base de datos
 
-```
-shortr/
-├── server.js              # Entry point — Express, auth, redirect
-├── backend/
-│   ├── db/
-│   │   └── database.js    # SQLite (better-sqlite3) — schema idempotente
-│   ├── routes/
-│   │   ├── links.js       # CRUD de links
-│   │   └── analytics.js   # Stats globales y por link
-│   └── middleware/
-│       ├── auth.js        # Verificacion JWT
-│       └── rateLimit.js   # Rate limiting (login, API, redirects)
-└── public/
-    └── index.html         # SPA completo — login + dashboard + analytics
-```
+- Local: `./data/shortr.db`
+- Docker/produccion: `/data/shortr.db`
 
-### Base de datos (SQLite)
+Tablas principales:
 
-- `links` — almacena el codigo corto, URL original, fecha de creacion y expiracion
-- `clicks` — registra cada click con IP hasheada, user agent y referrer
+- `users`
+- `campaigns`
+- `links`
+- `clicks`
 
-La DB se almacena en `/data/shortr.db` (Docker) o `./data/shortr.db` (local).
-
-## Seguridad
-
-- Contrasenas nunca se almacenan — solo se comparan con `timingSafeEqual`
-- IPs se hashean con SHA-256 antes de persistir (privacidad por diseno)
-- Rate limiting en login (10 req/15min) y API (100 req/15min)
-- Tokens JWT con expiracion de 24h
-- Validacion estricta de URLs y alias en el backend
-
-## Licencia
-
-MIT
+Todas las migraciones aplican de forma idempotente en arranque.

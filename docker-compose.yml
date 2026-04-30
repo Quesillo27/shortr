@@ -12,10 +12,11 @@ services:
       - ADMIN_PASSWORD=cambia-esto
       - ADMIN_USER=admin
       - BASE_URL=http://localhost:3000
+      - ALLOWED_ORIGINS=http://localhost:3000
       - NODE_ENV=production
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/analytics/summary", "--header", "Authorization: Bearer skip"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
       interval: 30s
       timeout: 10s
       retries: 3

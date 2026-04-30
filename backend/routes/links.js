@@ -8,13 +8,14 @@
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
-const db = require('../db/database');
+const { db } = require('../db/database');
 const { verifyToken } = require('../middleware/auth');
+const { requirePermission } = require('../middleware/rbac');
 
 // Alias reservados que no pueden usarse como código corto
 const RESERVED_CODES = new Set([
   'api', 'admin', 'auth', 'analytics', 'health', 'login', 'logout',
-  'register', 'static', 'public', 'assets', 'favicon.ico', 'robots.txt'
+  'register', 'static', 'public', 'assets', 'users', 'favicon.ico', 'robots.txt'
 ]);
 
 // Generador de código corto usando crypto (sin dependencias ES modules)
@@ -42,7 +43,7 @@ function isValidAlias(alias) {
  * Crea un nuevo link corto.
  * Body: { url, alias?, expiresAt? }
  */
-router.post('/', verifyToken, (req, res) => {
+router.post('/', verifyToken, requirePermission('links:write'), (req, res) => {
   const { url, alias, expiresAt, campaignId } = req.body;
 
   // Validaciones
@@ -109,11 +110,17 @@ router.post('/', verifyToken, (req, res) => {
 
   try {
     const stmt = db.prepare(`
-      INSERT INTO links (code, original_url, expires_at, campaign_id)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO links (code, original_url, expires_at, campaign_id, created_by_user_id)
+      VALUES (?, ?, ?, ?, ?)
     `);
 
-    const result = stmt.run(code, url, expiresAtDate ? expiresAtDate.toISOString() : null, validCampaignId);
+    const result = stmt.run(
+      code,
+      url,
+      expiresAtDate ? expiresAtDate.toISOString() : null,
+      validCampaignId,
+      req.user.id || null
+    );
     const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
 
     res.status(201).json({
@@ -139,7 +146,7 @@ router.post('/', verifyToken, (req, res) => {
  * Lista links con paginación, búsqueda y filtro por campaña.
  * Query params: page, limit, search, campaign_id (número o "none" para sin campaña)
  */
-router.get('/', verifyToken, (req, res) => {
+router.get('/', verifyToken, requirePermission('links:read'), (req, res) => {
   const page   = Math.max(1, parseInt(req.query.page) || 1);
   const limit  = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
   const offset = (page - 1) * limit;
@@ -204,7 +211,7 @@ router.get('/', verifyToken, (req, res) => {
  * PATCH /api/links/:id/toggle
  * Activa o desactiva un link.
  */
-router.patch('/:id/toggle', verifyToken, (req, res) => {
+router.patch('/:id/toggle', verifyToken, requirePermission('links:toggle'), (req, res) => {
   const { id } = req.params;
 
   if (!id || isNaN(Number(id))) {
@@ -230,7 +237,7 @@ router.patch('/:id/toggle', verifyToken, (req, res) => {
  * DELETE /api/links/:id
  * Elimina un link por ID.
  */
-router.delete('/:id', verifyToken, (req, res) => {
+router.delete('/:id', verifyToken, requirePermission('links:delete'), (req, res) => {
   const { id } = req.params;
 
   if (!id || isNaN(Number(id))) {
