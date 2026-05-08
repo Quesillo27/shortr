@@ -87,8 +87,6 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_links_code ON links(code);
   CREATE INDEX IF NOT EXISTS idx_links_created ON links(created_at DESC);
   CREATE INDEX IF NOT EXISTS idx_links_campaign ON links(campaign_id);
-  CREATE INDEX IF NOT EXISTS idx_links_creator ON links(created_by_user_id);
-
   CREATE INDEX IF NOT EXISTS idx_clicks_link_id ON clicks(link_id);
   CREATE INDEX IF NOT EXISTS idx_clicks_clicked_at ON clicks(clicked_at);
   CREATE INDEX IF NOT EXISTS idx_clicks_link_date ON clicks(link_id, clicked_at);
@@ -114,6 +112,7 @@ addColumnIfMissing('campaigns', 'goal_clicks', 'INTEGER');
 
 addColumnIfMissing('links', 'campaign_id', 'INTEGER');
 addColumnIfMissing('links', 'created_by_user_id', 'INTEGER');
+db.exec('CREATE INDEX IF NOT EXISTS idx_links_creator ON links(created_by_user_id)');
 
 addColumnIfMissing('users', 'role', `TEXT NOT NULL DEFAULT '${DEFAULT_ROLE}'`);
 addColumnIfMissing('users', 'permissions_json', "TEXT NOT NULL DEFAULT '[]'");
