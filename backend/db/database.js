@@ -86,14 +86,10 @@ db.exec(`
 
   CREATE INDEX IF NOT EXISTS idx_links_code ON links(code);
   CREATE INDEX IF NOT EXISTS idx_links_created ON links(created_at DESC);
-  CREATE INDEX IF NOT EXISTS idx_links_campaign ON links(campaign_id);
+
   CREATE INDEX IF NOT EXISTS idx_clicks_link_id ON clicks(link_id);
   CREATE INDEX IF NOT EXISTS idx_clicks_clicked_at ON clicks(clicked_at);
   CREATE INDEX IF NOT EXISTS idx_clicks_link_date ON clicks(link_id, clicked_at);
-  CREATE INDEX IF NOT EXISTS idx_clicks_country ON clicks(country_code);
-  CREATE INDEX IF NOT EXISTS idx_clicks_ref_host ON clicks(referrer_host);
-  CREATE INDEX IF NOT EXISTS idx_clicks_utm_source ON clicks(utm_source);
-  CREATE INDEX IF NOT EXISTS idx_clicks_visitor ON clicks(visitor_hash);
 `);
 
 function columnNames(tableName) {
@@ -112,6 +108,7 @@ addColumnIfMissing('campaigns', 'goal_clicks', 'INTEGER');
 
 addColumnIfMissing('links', 'campaign_id', 'INTEGER');
 addColumnIfMissing('links', 'created_by_user_id', 'INTEGER');
+db.exec('CREATE INDEX IF NOT EXISTS idx_links_campaign ON links(campaign_id)');
 db.exec('CREATE INDEX IF NOT EXISTS idx_links_creator ON links(created_by_user_id)');
 
 addColumnIfMissing('users', 'role', `TEXT NOT NULL DEFAULT '${DEFAULT_ROLE}'`);
@@ -140,6 +137,13 @@ const clickColumns = [
 for (const [name, type] of clickColumns) {
   addColumnIfMissing('clicks', name, type);
 }
+
+db.exec(`
+  CREATE INDEX IF NOT EXISTS idx_clicks_country ON clicks(country_code);
+  CREATE INDEX IF NOT EXISTS idx_clicks_ref_host ON clicks(referrer_host);
+  CREATE INDEX IF NOT EXISTS idx_clicks_utm_source ON clicks(utm_source);
+  CREATE INDEX IF NOT EXISTS idx_clicks_visitor ON clicks(visitor_hash);
+`);
 
 const updateLoginStmt = db.prepare('UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?');
 
