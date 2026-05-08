@@ -3,6 +3,10 @@ function hasPermission(req, permission) {
   return userPermissions.includes(permission);
 }
 
+function isAdmin(req) {
+  return !!(req.user && req.user.role === 'admin');
+}
+
 function requirePermission(permission) {
   return (req, res, next) => {
     if (!req.user) {
@@ -17,7 +21,21 @@ function requirePermission(permission) {
   };
 }
 
+function requireAdmin(req, res, next) {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Sesion no valida' });
+  }
+
+  if (!isAdmin(req)) {
+    return res.status(403).json({ error: 'Solo un admin puede realizar esta accion' });
+  }
+
+  next();
+}
+
 module.exports = {
   hasPermission,
-  requirePermission
+  isAdmin,
+  requirePermission,
+  requireAdmin
 };

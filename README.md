@@ -11,7 +11,7 @@ Shortr es un acortador de URLs self-hosted con panel administrativo, captura de 
 - Referrer host normalizado y conteo de visitantes unicos aproximados
 - Multiusuario con RBAC (admin/editor/viewer) y permisos adicionales
 - Hardening basico: headers de seguridad, rate limits por tipo de endpoint, JWT con issuer/audience
-- Endpoint administrativo para limpiar datos y dejar el sistema listo para reutilizar
+- Endpoint administrativo para limpiar datos y dejar el sistema listo para reutilizar conservando solo el admin que ejecuta la accion
 
 ## Requisitos
 
@@ -91,7 +91,7 @@ Shortr es un acortador de URLs self-hosted con panel administrativo, captura de 
 ### Operacion
 
 - `GET /health`
-- `POST /api/admin/reset-data` (requiere permiso `users:delete` y body `{ "confirm": "RESET" }`)
+- `POST /api/admin/reset-data` (requiere rol `admin` y body `{ "confirm": "RESET" }`)
 
 ## Desarrollo local
 

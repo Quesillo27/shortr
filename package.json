@@ -5,7 +5,10 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "check:syntax": "node --check server.js && node --check backend/db/database.js && node --check backend/middleware/auth.js && node --check backend/middleware/rateLimit.js && node --check backend/middleware/rbac.js && node --check backend/routes/analytics.js && node --check backend/routes/campaigns.js && node --check backend/routes/links.js && node --check backend/routes/users.js && node --check backend/security/password.js && node --check backend/security/permissions.js",
+    "check:frontend": "node scripts/check-inline-scripts.js",
+    "check": "npm run check:syntax && npm run check:frontend"
   },
   "dependencies": {
     "better-sqlite3": "^8.7.0",

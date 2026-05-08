@@ -19,7 +19,7 @@ router.use(verifyToken, analyticsLimiter, requirePermission('analytics:read'));
  */
 router.get('/summary', (req, res) => {
   try {
-    const totalLinks = db.prepare('SELECT COUNT(*) AS count FROM links WHERE is_active = 1').get();
+    const totalLinks = db.prepare('SELECT COUNT(*) AS count FROM links').get();
     const totalClicks = db.prepare('SELECT COUNT(*) AS count FROM clicks').get();
     const uniqueVisitors = db.prepare(`
       SELECT COUNT(DISTINCT COALESCE(visitor_hash, ip_hash)) AS count

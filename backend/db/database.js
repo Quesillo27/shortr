@@ -165,15 +165,31 @@ function touchUserLogin(userId) {
   updateLoginStmt.run(userId);
 }
 
-function resetAppData() {
-  const deleteUsers = db.prepare("DELETE FROM users WHERE role <> 'admin'");
+function resetAppData(preservedAdminUserId) {
+  const targetAdminId = Number.isInteger(preservedAdminUserId) && preservedAdminUserId > 0
+    ? preservedAdminUserId
+    : null;
+
+  const preservedAdmin = targetAdminId
+    ? db.prepare("SELECT id FROM users WHERE id = ? AND role = 'admin'").get(targetAdminId)
+    : db.prepare("SELECT id FROM users WHERE role = 'admin' ORDER BY id ASC LIMIT 1").get();
+
+  if (!preservedAdmin) {
+    throw new Error('No existe un admin valido para preservar durante la limpieza');
+  }
 
   db.transaction(() => {
     db.exec('DELETE FROM clicks');
     db.exec('DELETE FROM links');
     db.exec('DELETE FROM campaigns');
-    deleteUsers.run();
-    db.exec('DELETE FROM sqlite_sequence WHERE name IN (\'clicks\',\'links\',\'campaigns\')');
+    db.prepare('DELETE FROM users WHERE id <> ?').run(preservedAdmin.id);
+    db.prepare(`
+      UPDATE users
+      SET role = 'admin', permissions_json = '[]', is_active = 1, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).run(preservedAdmin.id);
+    db.exec('DELETE FROM sqlite_sequence WHERE name IN (\'clicks\',\'links\',\'campaigns\',\'users\')');
+    db.prepare('UPDATE sqlite_sequence SET seq = ? WHERE name = ?').run(preservedAdmin.id, 'users');
   })();
 }
 

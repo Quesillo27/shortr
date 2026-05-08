@@ -10,8 +10,8 @@ const geoip = require('geoip-lite');
 const UAParser = require('ua-parser-js');
 const { verifyPassword } = require('./backend/security/password');
 const { resolvePermissions } = require('./backend/security/permissions');
-const { signAuthToken, verifyToken } = require('./backend/middleware/auth');
-const { requirePermission } = require('./backend/middleware/rbac');
+const { JWT_EXPIRES_IN, signAuthToken, verifyToken } = require('./backend/middleware/auth');
+const { requireAdmin } = require('./backend/middleware/rbac');
 
 const DUMMY_PASSWORD_HASH = `pbkdf2$210000$0123456789abcdef0123456789abcdef${'$'}${'0'.repeat(128)}`;
 
@@ -130,7 +130,7 @@ app.post('/api/auth/login', loginLimiter, (req, res) => {
       username: user.username,
       role: user.role,
       permissions,
-      expiresIn: 43200
+      expiresIn: JWT_EXPIRES_IN
     });
   } catch (err) {
     console.error('Error en login:', err.message);
@@ -138,15 +138,15 @@ app.post('/api/auth/login', loginLimiter, (req, res) => {
   }
 });
 
-app.post('/api/admin/reset-data', verifyToken, requirePermission('users:delete'), (req, res) => {
+app.post('/api/admin/reset-data', verifyToken, requireAdmin, (req, res) => {
   const confirm = req.body && req.body.confirm;
   if (confirm !== 'RESET') {
     return res.status(400).json({ error: 'Confirmacion invalida. Envia {"confirm":"RESET"}' });
   }
 
   try {
-    resetAppData();
-    res.json({ message: 'Datos limpiados correctamente. El sistema esta listo para reutilizar.' });
+    resetAppData(req.user.id);
+    res.json({ message: 'Datos limpiados correctamente. Solo se conservo tu admin para reutilizar la instancia.' });
   } catch (err) {
     console.error('Error limpiando datos:', err.message);
     res.status(500).json({ error: 'Error interno del servidor' });

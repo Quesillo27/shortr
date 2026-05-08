@@ -1497,7 +1497,7 @@
   <div id="login-screen">
     <div class="login-card">
       <div class="login-logo">
-        <div class="logo-mark">&#128279;</div>
+        <div class="logo-mark"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
         <h1>Shortr</h1>
         <p>URL Shortener con Analytics</p>
       </div>
@@ -1510,11 +1510,11 @@
           <input type="text" id="username" autocomplete="username" placeholder="admin" required />
         </div>
         <div class="form-group">
-          <label for="password">Contrasena</label>
+          <label for="password">Contraseña</label>
           <input type="password" id="password" autocomplete="current-password" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" required />
         </div>
         <button type="submit" class="btn btn-primary btn-full" id="login-btn">
-          Iniciar sesion
+          Iniciar sesión
         </button>
       </form>
     </div>
@@ -1525,7 +1525,7 @@
     <!-- Navbar -->
     <nav class="navbar">
       <a href="#" class="nav-brand">
-        <div class="nav-logo-mark">&#128279;</div>
+        <div class="nav-logo-mark"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
         <span>Shortr</span>
       </a>
       <div class="nav-tabs">
@@ -1538,7 +1538,7 @@
           <div class="nav-avatar" id="nav-avatar">A</div>
           <span id="nav-username">admin</span>
         </div>
-        <button class="btn btn-ghost btn-sm" id="logout-btn">Cerrar sesion</button>
+        <button class="btn btn-ghost btn-sm" id="logout-btn">Cerrar sesión</button>
       </div>
     </nav>
 
@@ -1583,22 +1583,22 @@
 
         <div class="stats-grid" id="cd-stats-grid" style="margin-bottom:1.25rem">
           <div class="stat-card">
-            <div class="stat-icon purple">&#128279;</div>
+            <div class="stat-icon purple"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
             <div class="stat-value" id="cd-total-links">--</div>
             <div class="stat-label">Links</div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon green">&#9889;</div>
+            <div class="stat-icon green"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
             <div class="stat-value" id="cd-active-links">--</div>
             <div class="stat-label">Activos</div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon blue">&#128432;</div>
+            <div class="stat-icon blue"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
             <div class="stat-value" id="cd-total-clicks">--</div>
             <div class="stat-label">Clicks Totales</div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon amber">&#8679;</div>
+            <div class="stat-icon amber"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
             <div class="stat-value" id="cd-clicks-today">--</div>
             <div class="stat-label">Clicks Hoy</div>
           </div>
@@ -1632,7 +1632,7 @@
         <!-- Gráfica 30 días de campaña -->
         <div class="campaign-chart-panel" id="cd-chart-panel">
           <div class="chart-header">
-            <strong>Clicks — últimos 30 días</strong>
+            <strong id="cd-chart-title">Clicks — últimos 30 días</strong>
             <span id="cd-chart-info"></span>
           </div>
           <div class="campaign-chart-inline">
@@ -1646,6 +1646,7 @@
           <div class="breakdown-panel"><h4>&#127760; Países</h4><div id="cd-country-list"></div></div>
           <div class="breakdown-panel"><h4>&#127758; Navegadores</h4><div id="cd-browser-list"></div></div>
           <div class="breakdown-panel"><h4>&#128187; Sistema Operativo</h4><div id="cd-os-list"></div></div>
+          <div class="breakdown-panel"><h4>&#128202; UTM Source</h4><div id="cd-source-list"></div></div>
         </div>
 
         <!-- Panel de crear link dentro de campaña -->
@@ -1711,7 +1712,7 @@
                 </tr>
               </thead>
               <tbody id="links-tbody">
-                <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">&#128279;</div><p>Cargando...</p></div></td></tr>
+                <tr><td colspan="6"><div class="empty-state"><div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="36" height="36"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div><p>Cargando...</p></div></td></tr>
               </tbody>
             </table>
           </div>
@@ -1728,29 +1729,29 @@
     <div id="section-general" class="main-content section">
       <div class="stats-grid" id="stats-grid">
         <div class="stat-card">
-          <div class="stat-icon purple">&#128279;</div>
+          <div class="stat-icon purple"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
           <div class="stat-value" id="stat-total-links">--</div>
           <div class="stat-label">Total de Links</div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon blue">&#128432;</div>
+          <div class="stat-icon blue"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
           <div class="stat-value" id="stat-total-clicks">--</div>
           <div class="stat-label">Clicks Totales</div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon green">&#8679;</div>
+          <div class="stat-icon green"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
           <div class="stat-value" id="stat-clicks-today">--</div>
           <div class="stat-label">Clicks Hoy</div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon amber">&#9889;</div>
+          <div class="stat-icon amber"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
           <div class="stat-value" id="stat-active-links">--</div>
           <div class="stat-label">Links Activos</div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon blue">&#128101;</div>
+          <div class="stat-icon blue"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
           <div class="stat-value" id="stat-unique-visitors">--</div>
-          <div class="stat-label">Visitantes Unicos</div>
+          <div class="stat-label">Visitantes Únicos</div>
         </div>
       </div>
       <div class="activity-panel">
@@ -1785,7 +1786,7 @@
                 <input type="text" id="new-user-username" placeholder="editor_marketing" required />
               </div>
               <div class="form-group">
-                <label for="new-user-password">Contrasena</label>
+                <label for="new-user-password">Contraseña</label>
                 <input type="password" id="new-user-password" placeholder="minimo 8 caracteres" required />
               </div>
               <div class="form-group">
@@ -1827,7 +1828,7 @@
                 </tr>
               </thead>
               <tbody id="users-tbody">
-                <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">&#128101;</div><p>Cargando usuarios...</p></div></td></tr>
+                <tr><td colspan="6"><div class="empty-state"><div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="36" height="36"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><p>Cargando usuarios...</p></div></td></tr>
               </tbody>
             </table>
           </div>
@@ -1868,7 +1869,7 @@
           </div>
           <div class="analytics-stat">
             <div class="value" id="modal-unique-visitors">--</div>
-            <div class="label">Visitantes Unicos</div>
+            <div class="label">Visitantes Únicos</div>
           </div>
         </div>
 
@@ -2003,6 +2004,10 @@
       return Array.isArray(state.permissions) && state.permissions.includes(permission);
     }
 
+    function isAdmin() {
+      return state.role === 'admin';
+    }
+
     function saveSession() {
       if (state.token) sessionStorage.setItem('shortr_token', state.token);
       if (state.username) sessionStorage.setItem('shortr_username', state.username);
@@ -2118,7 +2123,7 @@
 
       document.getElementById('campaign-create-panel').style.display = can('links:write') ? '' : 'none';
       document.getElementById('create-user-form').style.display = can('users:write') ? '' : 'none';
-      document.getElementById('reset-data-btn').style.display = can('users:delete') ? '' : 'none';
+      document.getElementById('reset-data-btn').style.display = isAdmin() ? '' : 'none';
 
       loadDashboard();
     }
@@ -2378,8 +2383,8 @@
         tbody.innerHTML = `
           <tr><td colspan="6">
             <div class="empty-state">
-              <div class="empty-icon">&#128279;</div>
-              <p>No tienes links todavia. Crea uno arriba.</p>
+              <div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="36" height="36"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
+              <p>No tienes links todavía. Crea uno arriba.</p>
             </div>
           </td></tr>
         `;
@@ -2670,6 +2675,9 @@
         const periodLabel = period === 'all' ? 'Todo el tiempo'
           : `Últimos ${period} días${data.prev_clicks !== null ? ` · anterior: ${formatNumber(data.prev_clicks)} clicks` : ''}`;
         document.getElementById('cd-period-label').textContent = periodLabel;
+        document.getElementById('cd-chart-title').textContent = period === 'all'
+          ? 'Clicks — todo el tiempo'
+          : `Clicks — últimos ${period} días`;
 
         // Goal progress
         if (c.goal_clicks) {
@@ -2733,6 +2741,7 @@
           renderBreakdownList('cd-country-list', data.country_breakdown, 'country', 'count', item => countryFlag(item.country_code));
           renderBreakdownList('cd-browser-list', data.browser_breakdown, 'browser', 'count', item => BROWSER_ICONS[item.browser] || '🌐');
           renderBreakdownList('cd-os-list',      data.os_breakdown,      'os',      'count', null);
+          renderBreakdownList('cd-source-list',  data.source_breakdown,  'source',  'count', null);
           document.getElementById('cd-breakdown-grid').style.display = 'grid';
         } else {
           document.getElementById('cd-breakdown-grid').style.display = 'none';
@@ -2977,7 +2986,7 @@
     function renderUsersTable() {
       const tbody = document.getElementById('users-tbody');
       if (!state.users.length) {
-        tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">&#128101;</div><p>No hay usuarios creados.</p></div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="36" height="36"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><p>No hay usuarios creados.</p></div></td></tr>';
         return;
       }
 
@@ -3098,12 +3107,12 @@
     });
 
     document.getElementById('reset-data-btn').addEventListener('click', async () => {
-      if (!can('users:delete')) {
+      if (!isAdmin()) {
         toast('No tienes permiso para limpiar datos', 'error');
         return;
       }
 
-      const confirmText = prompt('Esta accion elimina clicks, links, campanas y usuarios no-admin. Escribe RESET para confirmar:');
+      const confirmText = prompt('Esta accion elimina clicks, links, campanas y todos los usuarios excepto tu admin actual. Escribe RESET para confirmar:');
       if (confirmText !== 'RESET') return;
 
       try {
@@ -3211,6 +3220,7 @@
       document.getElementById('modal-total-clicks').textContent = '--';
       document.getElementById('modal-clicks-today').textContent = '--';
       document.getElementById('modal-avg-clicks').textContent = '--';
+      document.getElementById('modal-unique-visitors').textContent = '--';
       document.getElementById('modal-short-url-box').style.display = 'none';
       document.getElementById('referrers-section').style.display = 'none';
 
@@ -3237,6 +3247,7 @@
           ? Math.round(data.clicks_by_day.reduce((s, d) => s + d.clicks, 0) / data.clicks_by_day.length)
           : 0;
         document.getElementById('modal-avg-clicks').textContent = formatNumber(avg);
+        document.getElementById('modal-unique-visitors').textContent = formatNumber(data.unique_visitors || 0);
 
         // URL corta
         const shortUrlBox = document.getElementById('modal-short-url-box');
@@ -3306,18 +3317,39 @@
         });
 
         // Referrers
-        if (data.top_referrers && data.top_referrers.length > 0) {
-          const maxClicks = Math.max(...data.top_referrers.map(r => r.count));
+        const sourceListEl = document.getElementById('source-list');
+        sourceListEl.innerHTML = '';
+
+        if ((data.top_referrers && data.top_referrers.length > 0) || (data.utm_source_breakdown && data.utm_source_breakdown.length > 0)) {
           const listEl = document.getElementById('referrer-list');
-          listEl.innerHTML = data.top_referrers.map(r => `
-            <div class="referrer-item">
-              <span class="referrer-name" title="${escHtml(r.referrer)}">${escHtml(r.referrer)}</span>
-              <div class="referrer-bar-wrap">
-                <div class="referrer-bar" style="width: ${maxClicks > 0 ? (r.count / maxClicks * 100) : 0}%"></div>
+          listEl.innerHTML = '';
+
+          if (data.top_referrers && data.top_referrers.length > 0) {
+            const maxReferrerClicks = Math.max(...data.top_referrers.map(r => r.count));
+            listEl.innerHTML = data.top_referrers.map(r => `
+              <div class="referrer-item">
+                <span class="referrer-name" title="${escHtml(r.referrer)}">${escHtml(r.referrer)}</span>
+                <div class="referrer-bar-wrap">
+                  <div class="referrer-bar" style="width: ${maxReferrerClicks > 0 ? (r.count / maxReferrerClicks * 100) : 0}%"></div>
+                </div>
+                <span class="referrer-count">${r.count}</span>
               </div>
-              <span class="referrer-count">${r.count}</span>
-            </div>
-          `).join('');
+            `).join('');
+          }
+
+          if (data.utm_source_breakdown && data.utm_source_breakdown.length > 0) {
+            const maxSourceClicks = Math.max(...data.utm_source_breakdown.map(r => r.count));
+            sourceListEl.innerHTML = data.utm_source_breakdown.map(r => `
+              <div class="referrer-item">
+                <span class="referrer-name" title="${escHtml(r.source)}">${escHtml(r.source)}</span>
+                <div class="referrer-bar-wrap">
+                  <div class="referrer-bar" style="width: ${maxSourceClicks > 0 ? (r.count / maxSourceClicks * 100) : 0}%"></div>
+                </div>
+                <span class="referrer-count">${r.count}</span>
+              </div>
+            `).join('');
+          }
+
           document.getElementById('referrers-section').style.display = 'block';
         }
 

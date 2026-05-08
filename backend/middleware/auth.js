@@ -56,6 +56,7 @@ function verifyToken(req, res, next) {
 }
 
 module.exports = {
+  JWT_EXPIRES_IN,
   signAuthToken,
   verifyToken
 };
